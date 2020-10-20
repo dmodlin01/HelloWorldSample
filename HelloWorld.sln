@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorldWebAPI", "HelloWorld\HelloWorldWebAPI.csproj", "{95EC0FF6-34A4-40C6-B07D-21F0009B3AFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorldWebAPI", "HelloWorld\HelloWorldWebAPI.csproj", "{95EC0FF6-34A4-40C6-B07D-21F0009B3AFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogServices", "CatalogServices\CatalogServices.csproj", "{42D85F55-FDDD-4C7E-B9C5-D5F4EBB16BA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogServices", "CatalogServices\CatalogServices.csproj", "{42D85F55-FDDD-4C7E-B9C5-D5F4EBB16BA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOs", "DTOs\DTOs.csproj", "{75639F55-96D0-45B8-8940-3B8C1B0AB4DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTOs", "DTOs\DTOs.csproj", "{75639F55-96D0-45B8-8940-3B8C1B0AB4DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repositories", "Repositories\Repositories.csproj", "{EB6A8EE8-A065-492C-ACBE-9C3ED817243A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repositories", "Repositories\Repositories.csproj", "{EB6A8EE8-A065-492C-ACBE-9C3ED817243A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorldConsole", "HelloWorldConsole\HelloWorldConsole.csproj", "{1DA112EC-2E87-4838-8028-D5E9DB2962A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorldConsole", "HelloWorldConsole\HelloWorldConsole.csproj", "{1DA112EC-2E87-4838-8028-D5E9DB2962A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repositories.Tests", "Repositories.Tests\Repositories.Tests.csproj", "{B7E868FC-1338-4301-A661-671F2E1A2CC0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{1DA112EC-2E87-4838-8028-D5E9DB2962A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DA112EC-2E87-4838-8028-D5E9DB2962A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DA112EC-2E87-4838-8028-D5E9DB2962A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7E868FC-1338-4301-A661-671F2E1A2CC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7E868FC-1338-4301-A661-671F2E1A2CC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7E868FC-1338-4301-A661-671F2E1A2CC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7E868FC-1338-4301-A661-671F2E1A2CC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -18,7 +18,7 @@ namespace CatalogServices
 
         public MessageDTO GetMessage()
         {
-            Logger.LogInformation($"Using {this.GetType()} with {_messageRepository.GetType()} to retrieve message");
+            Logger?.LogInformation($"Using {this.GetType()} with {_messageRepository.GetType()} to retrieve message");
             MessageDTO message = null;
             try
             {
@@ -26,7 +26,7 @@ namespace CatalogServices
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message, e);
+                Logger?.LogError(e.Message, e);
             }
             return message;
         }

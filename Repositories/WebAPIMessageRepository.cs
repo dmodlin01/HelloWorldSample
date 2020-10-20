@@ -10,13 +10,17 @@ namespace Repositories
     {
         private readonly ILogger<WebApiMessageRepository> _logger;
 
+        public WebApiMessageRepository()
+        {
+        }
+
         public WebApiMessageRepository(ILogger<WebApiMessageRepository> logger)
         {
             _logger = logger;
         }
         public MessageDTO GetMessage()
         {
-            _logger.LogInformation("Using WebApiMessageRepository to retrieve Message.");
+            _logger?.LogInformation("Using WebApiMessageRepository to retrieve Message.");
             var message = new MessageDTO();
             using var client = new HttpClient {BaseAddress = new Uri("https://localhost:44349/helloworld/")};
             //HTTP GET

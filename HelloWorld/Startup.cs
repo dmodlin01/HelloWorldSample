@@ -1,7 +1,9 @@
 using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Repositories;
@@ -14,9 +16,37 @@ namespace HelloWorldWebAPI
     {
         public Startup(IConfiguration configuration)
         {
+            //When testing via xUnit, the configuration would not be loaded (and the appsettings.json would not be available), as such need to build/load it
+            if (!((ConfigurationRoot) configuration).Providers.Any(p => p is JsonConfigurationProvider))
+            {
+                configuration = GetConfiguration();
+            }
             Configuration = configuration;
             WireLogging(configuration);
         }
+        #region Configuration wiring
+
+        /// <summary>
+        /// Wiring for configuration retrieval (ability to retrieve from appsettings.json)
+        /// </summary>
+        /// <param name="configurationBuilder"></param>
+        static void BuildConfig(IConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true); //connection to the appsettings.json
+        }
+        /// <summary>
+        /// Uses configuration builder to build out the configuration
+        /// </summary>
+        /// <returns>Configuration collection</returns>
+        private static IConfiguration GetConfiguration()
+        {
+            var builder = new ConfigurationBuilder();
+            BuildConfig(builder);
+            return builder.Build();
+        }
+
+        #endregion
 
         public IConfiguration Configuration { get; }
 

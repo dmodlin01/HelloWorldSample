@@ -13,7 +13,7 @@ namespace CatalogServices
         public RepositoryMessageService(ILogger<RepositoryMessageService> logger, IMessageRepository messageRepository) : base(
             logger, messageRepository)
         {
-            Logger.LogInformation("Instantiating WebApiMessageService.");
+            Logger?.LogInformation("Instantiating WebApiMessageService.");
         }
 
         public RepositoryMessageService(ILogger<RepositoryMessageService> logger) : base(logger, new MockMessageRepository()){}

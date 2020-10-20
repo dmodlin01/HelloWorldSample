@@ -16,7 +16,7 @@ namespace CatalogServices
         public WebApiMessageService(ILogger<WebApiMessageService> logger, IMessageRepository messageRepository) : base(
             logger, messageRepository)
         {
-            Logger.LogInformation("Instantiating WebApiMessageService.");
+            Logger?.LogInformation("Instantiating WebApiMessageService.");
         }
         /// <summary>
         /// Sample method to extend the base/abstract class

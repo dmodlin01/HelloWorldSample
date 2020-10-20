@@ -32,7 +32,7 @@ namespace Repositories
         }
         public MessageDTO GetMessage()
         {
-            _logger.LogInformation("Using MockMessageRepository to retrieve Message.");
+            _logger?.LogInformation("Using MockMessageRepository to retrieve Message.");
             return new MessageDTO { Message = _message };
         }
     }
