@@ -1,7 +1,10 @@
 using System.IO;
 using System.Linq;
+using AutoMap;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,12 +56,19 @@ namespace HelloWorldWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //wire EF db context
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"),b=>b.MigrationsAssembly("HelloWorldWebAPI"))
+            );
+            //wire AutoMapper for injection
+            services.AddAutoMapper(c=>c.AddProfile<AutoMappingProfile>(),typeof(Startup));
             RegisterRepositories(services);
             services.AddControllers();
         }
         private static void RegisterRepositories(IServiceCollection services)
         {
-            services.AddScoped<IMessageRepository, MockMessageRepository>();
+            //services.AddScoped<IMessageRepository, MockMessageRepository>();
+            services.AddScoped<IMessageRepository, EFMessageRepository>();
         }
         /// <summary>
         ///  Method will load the configuration file and configure logging
@@ -105,4 +115,6 @@ namespace HelloWorldWebAPI
             
         }
     }
+
+    
 }

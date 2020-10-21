@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
+using AutoMap;
+using AutoMapper;
 using CatalogServices;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -75,7 +79,12 @@ namespace HelloWorldConsole
                             services.AddTransient<MessageService<WebApiMessageService>, WebApiMessageService>();
                             break;
                         case "RepositoryMessageService":
-                            services.AddTransient<IMessageRepository, MockMessageRepository>();
+                            services.AddDbContext<AppDbContext>(options =>
+                                options.UseSqlServer(configuration.GetConnectionString("HelloWorldConnection"), 
+                                    b => b.MigrationsAssembly("HelloWorldWebApi"))
+                            );
+                            services.AddAutoMapper(c => c.AddProfile<AutoMappingProfile>(), typeof(Program));
+                            services.AddTransient<IMessageRepository, EFMessageRepository>();
                             services.AddTransient<MessageService<RepositoryMessageService>, RepositoryMessageService>();
                             break;
                         default:

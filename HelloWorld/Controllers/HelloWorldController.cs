@@ -1,4 +1,5 @@
 ﻿using System;
+using AutoMapper;
 using DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,12 +14,13 @@ namespace HelloWorldWebAPI.Controllers
         private IMessageRepository _messageRepository;
 
         private readonly ILogger<HelloWorldController> _logger;
+        private IMapper _mapper;
 
-        public HelloWorldController(ILogger<HelloWorldController> logger, IMessageRepository repository)
+        public HelloWorldController(ILogger<HelloWorldController> logger, IMessageRepository repository, IMapper mapper)
         {
             _logger = logger;
             _messageRepository = repository;
-
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -34,14 +36,7 @@ namespace HelloWorldWebAPI.Controllers
             {
                 _logger.LogError(e.Message, e);
             }
-
             return Ok(message);
-
         }
-
-
-
-
-
     }
 }
