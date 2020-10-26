@@ -1,4 +1,5 @@
-﻿using Repositories;
+﻿using DTOs;
+using Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace CatalogServices
@@ -6,7 +7,7 @@ namespace CatalogServices
     /// <summary>
     /// While the Abstract/base class it providing the base implementation, the intention of this class is to extend (Decorate) it
     /// </summary>
-    public class WebApiMessageService: MessageService<WebApiMessageService>
+    public class WebApiMessageService: MessageService
     {
         /// <summary>
         /// Extending the base constructor
@@ -26,5 +27,7 @@ namespace CatalogServices
         {
             return GetMessage()?.Message;
         }
+
+        
     }
 }

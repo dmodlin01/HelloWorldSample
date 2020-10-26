@@ -7,7 +7,7 @@ using Repositories;
 
 namespace CatalogServices
 {
-    public class RepositoryMessageService : MessageService<RepositoryMessageService>
+    public class RepositoryMessageService : MessageService
     {
 
         public RepositoryMessageService(ILogger<RepositoryMessageService> logger, IMessageRepository messageRepository) : base(

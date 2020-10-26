@@ -13,9 +13,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repositories", "Repositorie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorldConsole", "HelloWorldConsole\HelloWorldConsole.csproj", "{1DA112EC-2E87-4838-8028-D5E9DB2962A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repositories.Tests", "Repositories.Tests\Repositories.Tests.csproj", "{B7E868FC-1338-4301-A661-671F2E1A2CC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repositories.Tests", "Repositories.Tests\Repositories.Tests.csproj", "{B7E868FC-1338-4301-A661-671F2E1A2CC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoMap", "AutoMap\AutoMap.csproj", "{32875A04-F19D-40FD-8F95-16305D657EE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoMap", "AutoMap\AutoMap.csproj", "{32875A04-F19D-40FD-8F95-16305D657EE6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dmitriy.IDP", "Dmitriy.IDP\Dmitriy.IDP.csproj", "{054F4C31-EE71-42DC-905E-4228E03F8B81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorldWeb", "HelloWorldWeb\HelloWorldWeb.csproj", "{F3896042-C264-492E-9403-9FF9D91A9B60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +55,14 @@ Global
 		{32875A04-F19D-40FD-8F95-16305D657EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32875A04-F19D-40FD-8F95-16305D657EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32875A04-F19D-40FD-8F95-16305D657EE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{054F4C31-EE71-42DC-905E-4228E03F8B81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{054F4C31-EE71-42DC-905E-4228E03F8B81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{054F4C31-EE71-42DC-905E-4228E03F8B81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{054F4C31-EE71-42DC-905E-4228E03F8B81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3896042-C264-492E-9403-9FF9D91A9B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3896042-C264-492E-9403-9FF9D91A9B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3896042-C264-492E-9403-9FF9D91A9B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3896042-C264-492E-9403-9FF9D91A9B60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

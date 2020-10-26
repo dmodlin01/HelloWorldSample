@@ -76,7 +76,8 @@ namespace HelloWorldConsole
                     {
                         case "WebApiMessageService":
                             services.AddTransient<IMessageRepository, WebApiMessageRepository>();
-                            services.AddTransient<MessageService<WebApiMessageService>, WebApiMessageService>();
+                            //services.AddTransient<MessageService<WebApiMessageService>, WebApiMessageService>();
+                            services.AddTransient<MessageService, WebApiMessageService>();
                             break;
                         case "RepositoryMessageService":
                             services.AddDbContext<AppDbContext>(options =>
@@ -85,7 +86,7 @@ namespace HelloWorldConsole
                             );
                             services.AddAutoMapper(c => c.AddProfile<AutoMappingProfile>(), typeof(Program));
                             services.AddTransient<IMessageRepository, EFMessageRepository>();
-                            services.AddTransient<MessageService<RepositoryMessageService>, RepositoryMessageService>();
+                            services.AddTransient<MessageService, RepositoryMessageService>();
                             break;
                         default:
                             throw new Exception($"{messageServiceSource} Message Service is not supported.");

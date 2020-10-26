@@ -10,5 +10,7 @@ namespace DTOs
         public int MessageId;
         [DataMember(Name = "Message")]
         public string Message { get; set; }
+        [DataMember(Name = "MessageBody")]
+        public string MessageBody { get; set; }
     }
 }

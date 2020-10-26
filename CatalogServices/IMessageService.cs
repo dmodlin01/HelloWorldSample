@@ -5,18 +5,18 @@ using Repositories;
 
 namespace CatalogServices
 {
-    public abstract class MessageService<T>
+    public abstract class MessageService
     {
         private readonly IMessageRepository _messageRepository;
-        protected readonly ILogger<T> Logger;
+        protected readonly ILogger Logger;
 
-        protected MessageService(ILogger<T> logger, IMessageRepository messageRepository)
+        protected MessageService(ILogger logger, IMessageRepository messageRepository)
         {
             Logger = logger;
             _messageRepository = messageRepository;
         }
 
-        public MessageDTO GetMessage()
+        public  MessageDTO GetMessage()
         {
             Logger?.LogInformation($"Using {this.GetType()} with {_messageRepository.GetType()} to retrieve message");
             MessageDTO message = null;

@@ -12,6 +12,9 @@ namespace Repositories.Domain
     {
         [Key]
         public int MessageId { get; set; }
+        [Required]
+        [MaxLength(100)]
         public string Message { get; set; }
+        public string MessageBody { get; set; }
     }
 }

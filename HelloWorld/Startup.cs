@@ -56,9 +56,10 @@ namespace HelloWorldWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication();
             //wire EF db context
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"),b=>b.MigrationsAssembly("HelloWorldWebAPI"))
+                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"),b=>b.MigrationsAssembly("Repositories"))
             );
             //wire AutoMapper for injection
             services.AddAutoMapper(c=>c.AddProfile<AutoMappingProfile>(),typeof(Startup));
@@ -99,6 +100,7 @@ namespace HelloWorldWebAPI
             app.UseHttpsRedirection(); //redirect to https
             app.UseStatusCodePages(); //adds support for text-only headers http Status codes (i.e. 400/404/500 and etc)
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization(); //not going to define
             app.UseEndpoints(endpoints =>
             {

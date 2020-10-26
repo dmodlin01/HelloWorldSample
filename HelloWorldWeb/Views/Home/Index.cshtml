@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Http
+@model MessageVM
+
+@if (Model != null)
+{
+    <div class="caption">
+        @Model.Caption
+
+        <h3 class="pull-right">@Model.Message.Message</h3>
+
+        <p>@Model.Message.MessageBody</p>
+    </div>
+}
+else
+{
+    @if (Context.User.Identity.IsAuthenticated)
+    {
+        <a asp-area="" asp-controller="Home" asp-action="GetMessage">Retrieve the message of the day.</a>
+    }
+    else
+    {
+        <a asp-area="" asp-controller="Home" asp-action="GetMessage">Log in to retrieve the message of the day.</a>
+    }
+}
+
