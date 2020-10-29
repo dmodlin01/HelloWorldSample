@@ -85,7 +85,7 @@ namespace HelloWorldConsole
                                     b => b.MigrationsAssembly("HelloWorldWebApi"))
                             );
                             services.AddAutoMapper(c => c.AddProfile<AutoMappingProfile>(), typeof(Program));
-                            services.AddTransient<IMessageRepository, EFMessageRepository>();
+                            services.AddTransient<IMessageRepository, EfMessageRepository>();
                             services.AddTransient<MessageService, RepositoryMessageService>();
                             break;
                         default:

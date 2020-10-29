@@ -1,0 +1,21 @@
+﻿@model MessageDeliveryInfoVM;
+@{
+    ViewData["Title"] = "Personal Message Delivery Info";
+}
+
+
+<h2>Personal message delivery info</h2>
+<div class="container">
+    <div class="text bottomMarginSmall">
+        We have the following contact info for you:
+    </div>
+    <h6>Name: <span class="text text-info">@Model.FullName</span></h6>
+    <div class="text text-info">Email: @Model.Email</div>
+    <div class="text text-info">Phone: @Model.Phone</div>
+    <h6>Address:</h6>
+    <div class="text text-info">Street Address: @Model.Address.StreetAddress</div>
+    <div class="text text-info">Locality: @Model.Address.Locality</div>
+    <div class="text text-info">Postal Code: @Model.Address.PostalCode</div>
+    <div class="text text-info">Country: @Model.Address.Country</div>
+
+</div>

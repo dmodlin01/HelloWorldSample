@@ -77,7 +77,7 @@ namespace Repositories.Tests.Message
             using (var context = new AppDbContext(options))
             {
                 //Act
-                 var repository = new EFMessageRepository(context, mapper,null);
+                 var repository = new EfMessageRepository(context, mapper,null);
                  var message = repository.GetMessage();
                  //Assert
                  Assert.NotNull(message);

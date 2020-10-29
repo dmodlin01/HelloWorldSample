@@ -14,7 +14,10 @@ namespace Dmitriy.IDP
             new IdentityResource[]
             {
                 new IdentityResources.OpenId(),
-                new IdentityResources.Profile() //to support profile scope/ work with user profile claims (i.e. Name.GivenName, see TestUsers).
+                new IdentityResources.Profile(), //to support profile scope/ work with user profile claims (i.e. Name.GivenName, see TestUsers).
+                new IdentityResources.Email(), //add e-mail information to support email scope
+                new IdentityResources.Address(), //add Address info to support address scope
+                new IdentityResources.Phone()
             };
 
         public static IEnumerable<ApiScope> ApiScopes =>
@@ -37,7 +40,8 @@ namespace Dmitriy.IDP
                     AllowedScopes = //the scope the client can access
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile
+                        IdentityServerConstants.StandardScopes.Profile,
+                        
                     },
                     ClientSecrets =
                     {
@@ -61,7 +65,10 @@ namespace Dmitriy.IDP
                     AllowedScopes = //the scope the client can access
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone
                     },
                     ClientSecrets =
                     {

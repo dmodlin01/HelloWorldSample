@@ -2,12 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text.Json;
+using DTOs;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Test;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace Dmitriy.IDP.Quickstart
 {
@@ -17,14 +19,14 @@ namespace Dmitriy.IDP.Quickstart
         {
             get
             {
-                var address = new
+                var address = new AddressDTO
                 {
-                    street_address = "1 Cherry Ln",
-                    locality = "Apple Ville",
-                    postal_code = 12345,
-                    country = "Wonderland"
+                    StreetAddress = "1 Cherry Ln",
+                    Locality = "Apple Ville",
+                    PostalCode = 12345,
+                    Country = "Wonderland"
                 };
-                
+
                 return new List<TestUser>
                 {
                     new TestUser
@@ -37,13 +39,14 @@ namespace Dmitriy.IDP.Quickstart
                             new Claim(JwtClaimTypes.Name, "Bob Smith"),
                             new Claim(JwtClaimTypes.GivenName, "Robert"),
                             new Claim(JwtClaimTypes.FamilyName, "Smith"),
+                            new Claim(JwtClaimTypes.PhoneNumber,"847-847-8477"),
                             new Claim(JwtClaimTypes.Email, "bobsmith@email.com"),
                             new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
                             new Claim(JwtClaimTypes.WebSite, "http://bobsmith.com"),
-                            new Claim(JwtClaimTypes.Address, JsonSerializer.Serialize(address), IdentityServerConstants.ClaimValueTypes.Json)
+                            new Claim(JwtClaimTypes.Address, JsonConvert.SerializeObject(address), IdentityServerConstants.ClaimValueTypes.Json)
                         }
                     },
-                   
+
                 };
             }
         }

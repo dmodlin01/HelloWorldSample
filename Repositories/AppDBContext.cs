@@ -15,7 +15,7 @@ namespace Repositories
 
         }
 
-        public DbSet<MessageEnt> Messages { get; set; }
+        private DbSet<MessageEnt> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,26 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMap;
 using AutoMapper;
 using CatalogServices;
-using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Repositories;
 using Serilog;
 using Serilog.Formatting.Compact;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using HelloWorldWeb.AutoMap;
+using IdentityServer4;
 
 namespace HelloWorldWeb
 {
@@ -30,6 +28,7 @@ namespace HelloWorldWeb
         {
             Configuration = configuration;
             WireLogging(configuration);
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); //remove the mapping of claims
         }
 
         public IConfiguration Configuration { get; }
@@ -37,14 +36,14 @@ namespace HelloWorldWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //wire EF db context
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"), b => b.MigrationsAssembly("Repositories"))
-            );
-            //wire AutoMapper for injection
-            services.AddAutoMapper(c => c.AddProfile<AutoMappingProfile>(), typeof(Startup));
-            RegisterRepositories(services);
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                 .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
+            services.AddHttpClient("IDPClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:5001/");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+            });
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; //Cookie
@@ -58,30 +57,42 @@ namespace HelloWorldWeb
                     options.ClientId = "helloworldwebclient";
                     options.ResponseType = "code";
                     //options.UsePkce = true; //default setting
-                    options.Scope.Add("openid"); //default value
-                    options.Scope.Add("profile"); //default value
-                    //options.Scope.Add("address");
+                    options.Scope.Add(IdentityServerConstants.StandardScopes.OpenId); //default value
+                    options.Scope.Add(IdentityServerConstants.StandardScopes.Profile); //default value
+                    options.Scope.Add(IdentityServerConstants.StandardScopes.Address); //to bring in address info
+                    options.Scope.Add(IdentityServerConstants.StandardScopes.Email); //to bring in e-mail info
+                    options.Scope.Add(IdentityServerConstants.StandardScopes.Phone);
                     //options.Scope.Add("roles");
+                    //options.ClaimActions.Remove("nbf"); //remove the filter for the not before claim
                     //options.Scope.Add("imagegalleryapi");
                     //options.Scope.Add("subscriptionlevel");
                     //options.Scope.Add("country");
                     //options.Scope.Add("offline_access");
-                    //options.ClaimActions.DeleteClaim("sid");
-                    //options.ClaimActions.DeleteClaim("idp");
-                    //options.ClaimActions.DeleteClaim("s_hash");
-                    //options.ClaimActions.DeleteClaim("auth_time");
+                    options.ClaimActions.Remove("phone_number"); //remove session id claim
+                    options.ClaimActions.DeleteClaim("sid"); //remove session id claim
+                    options.ClaimActions.DeleteClaim("idp"); //remove the idp claim
+                    options.ClaimActions.DeleteClaim("s_hash");
+                    options.ClaimActions.DeleteClaim("auth_time");
                     //options.ClaimActions.MapUniqueJsonKey("role", "role");
                     //options.ClaimActions.MapUniqueJsonKey("subscriptionlevel", "subscriptionlevel");
                     //options.ClaimActions.MapUniqueJsonKey("country", "country");
                     options.SaveTokens = true;
                     options.ClientSecret = "secret";
-                    //options.GetClaimsFromUserInfoEndpoint = true;
+                    options.GetClaimsFromUserInfoEndpoint = true; //get user info claims from the IDP
                     //options.TokenValidationParameters = new TokenValidationParameters
                     //{
                     //    NameClaimType = JwtClaimTypes.GivenName,
                     //    RoleClaimType = JwtClaimTypes.Role
                     //};
                 });
+            //wire AutoMapper for injection
+            services.AddAutoMapper(c => c.AddProfile<HelloWorldWebMappingProfile>(), typeof(Startup));
+            //wire EF db context
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"), b => b.MigrationsAssembly("Repositories"))
+            );
+            //wire Services and Repositories for DI
+            RegisterServicesAndRepositories(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -111,7 +122,7 @@ namespace HelloWorldWeb
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
-        private static void RegisterRepositories(IServiceCollection services)
+        private static void RegisterServicesAndRepositories(IServiceCollection services)
         {
             services.AddScoped<IMessageRepository, WebApiMessageRepository>();
             //services.AddScoped<IMessageRepository, EFMessageRepository>();

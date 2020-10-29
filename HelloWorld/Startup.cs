@@ -69,7 +69,7 @@ namespace HelloWorldWebAPI
         private static void RegisterRepositories(IServiceCollection services)
         {
             //services.AddScoped<IMessageRepository, MockMessageRepository>();
-            services.AddScoped<IMessageRepository, EFMessageRepository>();
+            services.AddScoped<IMessageRepository, EfMessageRepository>();
         }
         /// <summary>
         ///  Method will load the configuration file and configure logging
