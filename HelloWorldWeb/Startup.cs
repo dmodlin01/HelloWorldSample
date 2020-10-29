@@ -36,11 +36,19 @@ namespace HelloWorldWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //wire Services and Repositories for DI
+            RegisterServicesAndRepositories(services);
             services.AddControllersWithViews()
                  .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
             services.AddHttpClient("IDPClient", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:5001/");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+            });
+            services.AddHttpClient("HelloWorldApiClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:44349/helloworld");
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
             });
@@ -91,8 +99,7 @@ namespace HelloWorldWeb
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"), b => b.MigrationsAssembly("Repositories"))
             );
-            //wire Services and Repositories for DI
-            RegisterServicesAndRepositories(services);
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -127,6 +134,7 @@ namespace HelloWorldWeb
             services.AddScoped<IMessageRepository, WebApiMessageRepository>();
             //services.AddScoped<IMessageRepository, EFMessageRepository>();
             services.AddScoped<MessageService, WebApiMessageService>();
+            services.AddScoped<IUserInfoRepository, IDPUserInfoRepository>();
         }
         /// <summary>
         ///  Method will load the configuration file and configure logging
