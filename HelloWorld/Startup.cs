@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using AutoMap;
 using AutoMapper;
+using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +57,15 @@ namespace HelloWorldWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication();
+            services.AddControllers().AddJsonOptions(o=>o.JsonSerializerOptions.PropertyNamingPolicy = null);
+            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme) //use Bearer token authentication
+                .AddIdentityServerAuthentication(o =>
+                {
+                    o.Authority =
+                        "https://localhost:5001"; //auth server (IDP) is going to be used for authorization - validates access tokens
+                    o.ApiName =
+                        "helloworldapi"; //used to check if the api is a valid audience in the token (if token is intended for it)
+                });
             //wire EF db context
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"),b=>b.MigrationsAssembly("Repositories"))
@@ -64,7 +73,7 @@ namespace HelloWorldWebAPI
             //wire AutoMapper for injection
             services.AddAutoMapper(c=>c.AddProfile<AutoMappingProfile>(),typeof(Startup));
             RegisterRepositories(services);
-            services.AddControllers();
+            
         }
         private static void RegisterRepositories(IServiceCollection services)
         {
@@ -100,21 +109,20 @@ namespace HelloWorldWebAPI
             app.UseHttpsRedirection(); //redirect to https
             app.UseStatusCodePages(); //adds support for text-only headers http Status codes (i.e. 400/404/500 and etc)
             app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization(); //not going to define
+            app.UseAuthentication(); //use the middleware (defined in ConfigureServices) for Authentication
+            app.UseAuthorization(); //use the middleware (defined in ConfigureServices) for Authorization
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    //endpoints.MapControllers(); //going to use the default controller mapping
+
+            //});
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers(); //going to use the default controller mapping
-                
-                ////can use the below to bypass controller/Action method
-                //var message = new MessageDTO{Message = "Hello World!"};
-                //var jsonMessage = JsonConvert.SerializeObject(message);
-                //endpoints.MapGet("/", async context =>
-                //{
-                //    await context.Response.WriteAsync(jsonMessage);
-                //});
+                endpoints.MapDefaultControllerRoute();
+                //endpoints.MapControllerRoute(
+                //    name: "default",
+                //    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-            
         }
     }
 

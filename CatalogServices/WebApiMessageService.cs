@@ -25,7 +25,7 @@ namespace CatalogServices
         /// <returns></returns>
         public string GetMessageText()
         {
-            return GetMessage()?.Message;
+            return GetLatestMessage()?.Message;
         }
 
         

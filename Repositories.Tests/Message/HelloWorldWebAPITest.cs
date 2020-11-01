@@ -29,12 +29,12 @@ namespace Repositories.Tests.Message
         public async Task ReturnHelloWorld()
         {
             // Act
-            var response = await _client.GetAsync("/helloworld");
+            var response = await _client.GetAsync("/home");
             response.EnsureSuccessStatusCode();
             var resultMessage = await response.Content.ReadAsStringAsync();
-            var message = JsonConvert.DeserializeObject<MessageDTO>(resultMessage);
+            var message = JsonConvert.DeserializeObject<string>(resultMessage);
             // Assert
-            Assert.Equal("Hello World", message.Message);
+            Assert.Equal("Home controller", message);
         }
     }
 }

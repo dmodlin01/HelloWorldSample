@@ -32,6 +32,7 @@ namespace Dmitriy.IDP
                 })
                 .AddInMemoryIdentityResources(Config.IdentityResources)
                 .AddInMemoryApiScopes(Config.ApiScopes)
+                .AddInMemoryApiResources(Config.ApiResources)
                 .AddInMemoryClients(Config.Clients)
                 .AddTestUsers(TestUsers.Users); //Add the user(s) listed in TestUsers to authenticate and authorize
                 

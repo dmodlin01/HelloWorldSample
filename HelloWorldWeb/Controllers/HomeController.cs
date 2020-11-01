@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CatalogServices;
+using DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using HelloWorldWeb.Models;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Repositories;
 
 namespace HelloWorldWeb.Controllers
@@ -38,13 +40,29 @@ namespace HelloWorldWeb.Controllers
             return View();
         }
         [Authorize]
-        public async Task<IActionResult> GetMessage()
+        public async Task<IActionResult> GetMessages()
         {
             await WriteOutIdentityInformation();
             ViewData["Title"] = "Hello World Web app";
-            var message = _messageService.GetMessage();
-            var messageVm = new MessageVM { Caption = "Message of the day: ", Message = message };
-            return View("Index",messageVm);
+            try
+            {
+                var userId = 0;
+                if (User.Claims.Any(c => c.Type == "sub")) //check if the claim containing userID exists
+                {
+                    var idVal = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value ?? "0";
+                    userId = int.Parse(idVal);
+                }
+                var message = userId == 0 ? _messageService.GetLatestMessage() : _messageService.GetLatestMessageForUser(userId);
+                var messages = userId == 0
+                    ? _messageService.GetApplicableMessages()
+                    : _messageService.GetMessagesForUser(userId);
+                var messageVm = new MessageVM {LatestMessage  = message, RemainingMessages = messages.Where(m=>m.MessageId!=message.MessageId).ToList()};
+                return View("Index", messageVm);
+            }
+            catch (Exception e) when (e is AggregateException && e.InnerException is SecurityTokenExpiredException || e is UnauthorizedAccessException)
+            {
+                return RedirectToAction("AccessDenied", "Authorization");
+            }
         }
         public async Task Logout()
         //public async Task<IActionResult> Logout()

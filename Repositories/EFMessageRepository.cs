@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using DTOs;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -10,9 +11,9 @@ namespace Repositories
     public class EfMessageRepository : IMessageRepository
     {
         private readonly AppDbContext _appDbContext;
-        private IMapper _mapper;
-        private GenericRepository<MessageEnt> _messageRepository;
-        private ILogger<EfMessageRepository> _logger;
+        private readonly IMapper _mapper;
+        private readonly GenericRepository<MessageEnt> _messageRepository;
+        private readonly ILogger<EfMessageRepository> _logger;
 
         public GenericRepository<MessageEnt> MessageRepository => _messageRepository ?? new GenericRepository<MessageEnt>(_appDbContext);
 
@@ -24,17 +25,33 @@ namespace Repositories
             _logger = logger;
             _messageRepository = new GenericRepository<MessageEnt>(_appDbContext);
         }
-        public MessageDTO GetMessage()
+        public MessageDTO GetLatestMessage()
         {
-            _logger?.LogInformation("Using EFMessageRepository to retrieve Message.");
-            //var messageEnt = _appDbContext.Messages.FirstOrDefault();
-            var messageEnt = MessageRepository.FirstOrDefault();
+            _logger?.LogInformation("Using EFMessageRepository to retrieve the latest Message.");
+            var messageEnt = MessageRepository.Get(orderBy: m => m.OrderByDescending(ord => ord.MessageId)).FirstOrDefault();
             return _mapper.Map<MessageDTO>(messageEnt);
-
         }
+        public MessageDTO GetLatestUserMessage(int userId)
+        {
+            _logger?.LogInformation("Using EFMessageRepository to retrieve latest Message by user.");
+            var messageEnt = MessageRepository.Get(filter:m=>m.UserId==userId,orderBy:m=>m.OrderByDescending(ord=>ord.MessageId)).FirstOrDefault();
+            return _mapper.Map<MessageDTO>(messageEnt);
+        }
+
+        public List<MessageDTO> GetApplicableMessages()
+        {
+            var messageEnts = MessageRepository.Get().ToList();
+            return _mapper.Map<List<MessageDTO>>(messageEnts);
+        }
+
+        public List<MessageDTO> GetUserMessages(int userId)
+        {
+            var messageEnts = MessageRepository.Get(m=>m.UserId == userId);
+            return _mapper.Map<List<MessageDTO>>(messageEnts);
+        }
+
         public MessageDTO GetMessageById(int id)
         {
-            //var messageEnt = _appDbContext.Messages.FirstOrDefault(m => m.MessageId == id);
             var messageEnt = MessageRepository.GetById(id);
             return _mapper.Map<MessageDTO>(messageEnt);
         }

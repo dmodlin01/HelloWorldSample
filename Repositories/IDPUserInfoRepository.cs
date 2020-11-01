@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 using IdentityModel.Client;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Repositories
 {
@@ -13,13 +14,14 @@ namespace Repositories
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<WebApiMessageRepository> _logger;
-
-        public IDPUserInfoRepository(ILogger<WebApiMessageRepository> logger, IHttpClientFactory httpClientFactory)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public IDPUserInfoRepository(ILogger<WebApiMessageRepository> logger, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _httpContextAccessor = httpContextAccessor;
         }
-        public  IEnumerable<Claim> RetrieveUserInfoClaims(string accessToken)
+        public  IEnumerable<Claim> RetrieveUserInfoClaims()
         {
             var idpClient = _httpClientFactory.CreateClient("IDPClient");
 
@@ -36,7 +38,7 @@ namespace Repositories
                 new UserInfoRequest
                 {
                     Address = mdrResult.UserInfoEndpoint, //https://localhost:5001/connect/userinfo
-                    Token = accessToken
+                    Token = AccessToken
                 });
             userInfoResponseTask.Wait();
             var userInfoResult = userInfoResponseTask.Result;
@@ -47,6 +49,18 @@ namespace Repositories
                     , userInfoResult.Exception);
             }
             return userInfoResult.Claims;
+        }
+
+        private string AccessToken
+        {
+            get
+            {
+                var accessTokenTask =
+                    _httpContextAccessor.HttpContext.GetTokenAsync(OpenIdConnectParameterNames
+                        .AccessToken); //Retrieve access token (needed to access the IDP)
+                accessTokenTask.Wait(); //wait for completion
+                return accessTokenTask.Result;
+            }
         }
     }
 }

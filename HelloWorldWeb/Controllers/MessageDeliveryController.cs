@@ -34,13 +34,11 @@ namespace HelloWorldWeb.Controllers
             _userInfoRepository = userInfoRepository;
         }
 
-        public async Task<IActionResult> GetMessageDeliveryInfo()
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetMessageDeliveryInfo()
         {
-            var accessToken = await HttpContext
-                .GetTokenAsync(OpenIdConnectParameterNames.AccessToken);//Retrieve access token (needed to access the IDP)
-           
             var fullName = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
-            var claims =  _userInfoRepository.RetrieveUserInfoClaims(accessToken);
+            var claims =  _userInfoRepository.RetrieveUserInfoClaims();
             var address = claims.FirstOrDefault(c => c.Type == "address")?.Value;
             var phone = claims
                 .FirstOrDefault(c => c.Type == "phone_number")?.Value;

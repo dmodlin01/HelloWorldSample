@@ -8,7 +8,7 @@ namespace HelloWorldWeb.ViewModels
 {
     public class MessageVM
     {
-        public string Caption;
-        public MessageDTO Message;
+        public MessageDTO LatestMessage;
+        public List<MessageDTO> RemainingMessages;
     }
 }

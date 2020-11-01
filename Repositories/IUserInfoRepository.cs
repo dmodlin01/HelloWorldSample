@@ -6,6 +6,6 @@ namespace Repositories
 {
     public interface IUserInfoRepository
     {
-       IEnumerable<Claim> RetrieveUserInfoClaims(string accessToken);
+       IEnumerable<Claim> RetrieveUserInfoClaims();
     }
 }

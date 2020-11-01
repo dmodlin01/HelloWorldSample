@@ -40,9 +40,20 @@ namespace Repositories.EF
                 return query.ToList();
             }
         }
+
+        public virtual bool All(Expression<Func<TEntity, bool>> filter)
+        {
+            return dbSet.All(filter);
+        }
+
         public virtual TEntity FirstOrDefault()
         {
             return dbSet.FirstOrDefault();
+        }
+
+        public virtual TEntity LastOrDefault()
+        {
+            return dbSet.LastOrDefault();
         }
         public virtual TEntity GetById(object id)
         {

@@ -42,11 +42,32 @@ namespace Dmitriy.IDP.Quickstart
                             new Claim(JwtClaimTypes.PhoneNumber,"847-847-8477"),
                             new Claim(JwtClaimTypes.Email, "bobsmith@email.com"),
                             new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
-                            new Claim(JwtClaimTypes.WebSite, "http://bobsmith.com"),
-                            new Claim(JwtClaimTypes.Address, JsonConvert.SerializeObject(address), IdentityServerConstants.ClaimValueTypes.Json)
+                            new Claim(JwtClaimTypes.WebSite, "http://thesmiths.com"),
+                            new Claim(JwtClaimTypes.Address, JsonConvert.SerializeObject(address), IdentityServerConstants.ClaimValueTypes.Json),
+                            //new Claim (JwtClaimTypes.Role, "User"), //needed for Role Based Authorization
+                            new Claim (JwtClaimTypes.Role, "Admin")
                         }
                     },
-
+                    new TestUser
+                    {
+                        SubjectId = "8902550",
+                        Username = "jane",
+                        Password = "smith",
+                        Claims =
+                        {
+                            new Claim(JwtClaimTypes.Name, "Jane Smith"),
+                            new Claim(JwtClaimTypes.GivenName, "Jane"),
+                            new Claim(JwtClaimTypes.FamilyName, "Smith"),
+                            new Claim(JwtClaimTypes.PhoneNumber,"847-345-4224"),
+                            new Claim(JwtClaimTypes.Email, "janesmith@email.com"),
+                            new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
+                            new Claim(JwtClaimTypes.WebSite, "http://thesmiths.com"),
+                            new Claim(JwtClaimTypes.Address, JsonConvert.SerializeObject(address), IdentityServerConstants.ClaimValueTypes.Json),
+                            new Claim (JwtClaimTypes.Role, "User"),
+                            //new Claim (JwtClaimTypes.Role, "Admin")
+                            
+                        }
+                    },
                 };
             }
         }

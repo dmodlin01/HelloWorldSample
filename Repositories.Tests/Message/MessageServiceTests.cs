@@ -23,7 +23,7 @@ namespace Repositories.Tests.Message
             _messageRepository = new MockMessageRepository();
             var messageService = new RepositoryMessageService(null, _messageRepository);
             //Act
-            MessageDTO message = messageService.GetMessage();
+            MessageDTO message = messageService.GetLatestMessage();
             //Assert
             Assert.NotNull(message);
             Assert.Equal(message.Message, expectedResult);
@@ -39,7 +39,7 @@ namespace Repositories.Tests.Message
            
             var messageService = new RepositoryMessageService(null);
             //Act
-            MessageDTO message = messageService.GetMessage();
+            MessageDTO message = messageService.GetLatestMessage();
             //Assert
             Assert.NotNull(message);
             Assert.Equal(message.Message, expectedResult);
@@ -58,7 +58,7 @@ namespace Repositories.Tests.Message
             //Act
 
             //Assert
-            var exception = Assert.Throws<AggregateException>(() => messageService.GetMessage()); //expect to get Aggregate exception as the host for web API is off
+            var exception = Assert.Throws<AggregateException>(() => messageService.GetLatestMessage()); //expect to get Aggregate exception as the host for web API is off
             var innerException = exception.InnerException;
             Assert.NotNull(innerException); //check that inner exception is not null
             Assert.IsType<HttpRequestException>(innerException); //check that inner exception is of type HttpRequestException

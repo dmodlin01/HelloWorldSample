@@ -18,7 +18,10 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using HelloWorldWeb.AutoMap;
+using HelloWorldWeb.HttpHandlers;
+using IdentityModel;
 using IdentityServer4;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HelloWorldWeb
 {
@@ -40,6 +43,9 @@ namespace HelloWorldWeb
             RegisterServicesAndRepositories(services);
             services.AddControllersWithViews()
                  .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
+
+            services.AddHttpContextAccessor(); //needed to inject IHttpContextAccessor
+            services.AddTransient<BearerTokenHandler>(); //add the delegating handler to provision requests with the BearerToken (access token)
             services.AddHttpClient("IDPClient", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:5001/");
@@ -48,16 +54,21 @@ namespace HelloWorldWeb
             });
             services.AddHttpClient("HelloWorldApiClient", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:44349/helloworld");
+                client.BaseAddress = new Uri("https://localhost:44349/");
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
-            });
+            })
+                .AddHttpMessageHandler<BearerTokenHandler>(); //directing the requests to the API to be handled with the BearerTokenHandler
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; //Cookie
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme; //OpenIDConnect
             })
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)//configure cookie handler
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                    {
+                        options.AccessDeniedPath = "/Authorization/AccessDenied";
+                    }
+                    )//configure cookie handler
                 .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -70,7 +81,9 @@ namespace HelloWorldWeb
                     options.Scope.Add(IdentityServerConstants.StandardScopes.Address); //to bring in address info
                     options.Scope.Add(IdentityServerConstants.StandardScopes.Email); //to bring in e-mail info
                     options.Scope.Add(IdentityServerConstants.StandardScopes.Phone);
-                    //options.Scope.Add("roles");
+                    options.Scope.Add("roles"); //Add roles scope (Identity Resource) to bring the user roles
+                    options.Scope.Add("helloworldapi"); //add scope for API
+                    options.ClaimActions.MapUniqueJsonKey("role", "role"); //create a mapping for the role claims
                     //options.ClaimActions.Remove("nbf"); //remove the filter for the not before claim
                     //options.Scope.Add("imagegalleryapi");
                     //options.Scope.Add("subscriptionlevel");
@@ -81,25 +94,25 @@ namespace HelloWorldWeb
                     options.ClaimActions.DeleteClaim("idp"); //remove the idp claim
                     options.ClaimActions.DeleteClaim("s_hash");
                     options.ClaimActions.DeleteClaim("auth_time");
-                    //options.ClaimActions.MapUniqueJsonKey("role", "role");
                     //options.ClaimActions.MapUniqueJsonKey("subscriptionlevel", "subscriptionlevel");
                     //options.ClaimActions.MapUniqueJsonKey("country", "country");
                     options.SaveTokens = true;
                     options.ClientSecret = "secret";
                     options.GetClaimsFromUserInfoEndpoint = true; //get user info claims from the IDP
-                    //options.TokenValidationParameters = new TokenValidationParameters
-                    //{
-                    //    NameClaimType = JwtClaimTypes.GivenName,
-                    //    RoleClaimType = JwtClaimTypes.Role
-                    //};
+                    options.TokenValidationParameters = new TokenValidationParameters //map user roles to 
+                    {
+                        NameClaimType = JwtClaimTypes.GivenName,
+                        RoleClaimType = JwtClaimTypes.Role
+                    };
                 });
             //wire AutoMapper for injection
             services.AddAutoMapper(c => c.AddProfile<HelloWorldWebMappingProfile>(), typeof(Startup));
             //wire EF db context
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"), b => b.MigrationsAssembly("Repositories"))
+                //options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"), b => b.MigrationsAssembly("Repositories"))
+                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"), b => b.MigrationsAssembly("HelloWorldWeb"))
             );
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

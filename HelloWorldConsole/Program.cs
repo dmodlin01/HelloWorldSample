@@ -112,11 +112,11 @@ namespace HelloWorldConsole
                 {
                     case "WebApiMessageService":
                         var wevSvc = ActivatorUtilities.CreateInstance<WebApiMessageService>(host.Services); //create an instance of IMessageService from the DI container
-                        message = wevSvc.GetMessage().Message;
+                        message = wevSvc.GetLatestMessage().Message;
                         break;
                     case "RepositoryMessageService":
                         var repSvc = ActivatorUtilities.CreateInstance<RepositoryMessageService>(host.Services); //create an instance of IMessageService from the DI container
-                        message = repSvc.GetMessage().Message;
+                        message = repSvc.GetLatestMessage().Message;
                         break;
                     default:
                         throw new Exception($"{messageServiceSource} Message Service is not supported.");

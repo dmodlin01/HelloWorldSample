@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repositories;
 
-namespace Repositories.Migrations
+namespace HelloWorldWeb.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20201025030020_populate-message-body")]
-    partial class populatemessagebody
+    [Migration("20201031201544_table-setup")]
+    partial class tablesetup
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,28 +35,43 @@ namespace Repositories.Migrations
                     b.Property<string>("MessageBody")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("MessageId");
 
-                    b.ToTable("Messages");
+                    b.HasIndex("UserId");
 
-                    b.HasData(
-                        new
-                        {
-                            MessageId = 1,
-                            Message = "Hello World",
-                            MessageBody = "Hello World and all of its inhabitants!"
-                        },
-                        new
-                        {
-                            MessageId = 2,
-                            Message = "Greetings",
-                            MessageBody = "Greeting Friends"
-                        },
-                        new
-                        {
-                            MessageId = 3,
-                            Message = "Welcome"
-                        });
+                    b.ToTable("Messages","dbo");
+                });
+
+            modelBuilder.Entity("Repositories.Domain.UserEnt", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users","dbo");
+                });
+
+            modelBuilder.Entity("Repositories.Domain.MessageEnt", b =>
+                {
+                    b.HasOne("Repositories.Domain.UserEnt", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
