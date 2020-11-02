@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using DTOs;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using DTOs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 
 namespace Repositories
 {
@@ -32,11 +31,7 @@ namespace Repositories
         {
             _logger?.LogInformation("Using WebApiMessageRepository to retrieve Message.");
             var message = new MessageDTO();
-
-
             var client = _httpClientFactory.CreateClient("HelloWorldApiClient");
-            //client.DefaultRequestHeaders.Authorization =  new AuthenticationHeaderValue("Bearer", AccessToken);
-            //client.DefaultRequestHeaders.Add("Bearer", AccessToken);
             var responseTask = client.GetAsync("/message/getlatestmessage");
             responseTask.Wait();
 
@@ -55,7 +50,7 @@ namespace Repositories
             return message;
         }
 
-       
+
 
         public MessageDTO GetLatestUserMessage(int userId)
         {
@@ -85,13 +80,13 @@ namespace Repositories
         }
 
         /// <summary>
-        /// If user claims are populated with userID (sub), then only return messages belonging to the user.
+        /// If user is admin, all messages should be returned, otherwise messages are returned per the userID (sub, extracted from claims).
         ///Otherwise return all messages.
         /// </summary>
         /// <returns>List of MessageDTO objects</returns>
-        public List<MessageDTO> GetApplicableMessages()
+        public List<MessageDTO> GetAvailableMessages()
         {
-            _logger?.LogInformation("Using WebApiMessageRepository to retrieve applicable Messages.");
+            _logger?.LogInformation("Using WebApiMessageRepository to retrieve available Messages.");
             var messages = new List<MessageDTO>();
             var client = _httpClientFactory.CreateClient("HelloWorldApiClient");
             var responseTask = client.GetAsync("/message/getmessages");
@@ -133,6 +128,41 @@ namespace Repositories
                 throw new UnauthorizedAccessException(result.Content.ToString());
             }
             return messages;
+        }
+
+        public void AddMessage(ref MessageDTO messageDTO)
+        {
+            _logger?.LogInformation("Using WebApiMessageRepository to add Message.");
+            var client = _httpClientFactory.CreateClient("HelloWorldApiClient");
+
+            var serializedMessage = JsonConvert.SerializeObject(messageDTO);
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/message/addmessage")
+            {
+                Content = new StringContent(
+                serializedMessage,
+                System.Text.Encoding.Unicode,
+                "application/json")
+            };
+
+            var responseTask = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            responseTask.Wait();
+
+            var result = responseTask.Result;
+            if (result.IsSuccessStatusCode)
+            {
+                var readTask = result.Content.ReadAsStringAsync();
+                readTask.Wait();
+                var resultMessage = readTask.Result;
+                messageDTO = JsonConvert.DeserializeObject<MessageDTO>(resultMessage);
+            }
+            else
+            {
+                if (result.StatusCode == HttpStatusCode.Unauthorized || result.StatusCode == HttpStatusCode.Forbidden)
+                    throw new UnauthorizedAccessException(result.Content.ToString());
+                else
+                    throw new Exception(result.Content.ToString());
+            }
+            
         }
 
         private string AccessToken

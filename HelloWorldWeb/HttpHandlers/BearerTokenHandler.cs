@@ -6,11 +6,9 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
 
 namespace HelloWorldWeb.HttpHandlers
 {
@@ -70,7 +68,7 @@ namespace HelloWorldWeb.HttpHandlers
                 return await _httpContextAccessor
                        .HttpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
             }
-            
+
             var idpClient = _httpClientFactory.CreateClient("IDPClient");
 
             // get the discovery document

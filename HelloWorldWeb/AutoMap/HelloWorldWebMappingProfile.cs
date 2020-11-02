@@ -1,6 +1,7 @@
 ﻿using AutoMap;
 using DTOs;
 using HelloWorldWeb.Models;
+using HelloWorldWeb.ViewModels;
 
 namespace HelloWorldWeb.AutoMap
 {
@@ -9,7 +10,9 @@ namespace HelloWorldWeb.AutoMap
         public HelloWorldWebMappingProfile()
         {
             CreateMap<AddressDTO, AddressVM>();
+            CreateMap<AddMessageVM, MessageDTO>();
+
         }
-        
+
     }
 }

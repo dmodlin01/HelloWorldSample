@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using DTOs;
-using Serilog;
+﻿using DTOs;
+using System.Collections.Generic;
 
 namespace Repositories
 {
@@ -8,7 +7,8 @@ namespace Repositories
     {
         MessageDTO GetLatestMessage();
         MessageDTO GetLatestUserMessage(int userId);
-        List<MessageDTO> GetApplicableMessages();
+        List<MessageDTO> GetAvailableMessages();
         List<MessageDTO> GetUserMessages(int userId);
+        void AddMessage(ref MessageDTO messageDTO);
     }
 }

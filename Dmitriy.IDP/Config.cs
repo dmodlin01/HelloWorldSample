@@ -26,7 +26,9 @@ namespace Dmitriy.IDP
         public static IEnumerable<ApiScope> ApiScopes =>
             new[]
             {
-                new ApiScope("helloworldapi","Hello World API"), 
+                new ApiScope("helloworldapi","Hello World API",
+                    new List<string>{"role"}
+                    ), 
             };
         public static IEnumerable<ApiResource> ApiResources =>
             new[]

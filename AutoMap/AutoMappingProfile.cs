@@ -17,6 +17,11 @@ namespace AutoMap
                 .ForMember(m => m.RecipientId, opt => opt.MapFrom(s => s.UserId));
             //.ForSourceMember(x=>x.RecipientId,opt=>opt.DoNotValidate())
 
+            CreateMap<UserDTO, UserEnt>()
+               .ForMember(x => x.Messages, opt => opt.Ignore());
+
+            CreateMap<UserEnt, UserDTO>()
+                .ForSourceMember(x => x.Messages, opt => opt.DoNotValidate());
         }
     }
 }

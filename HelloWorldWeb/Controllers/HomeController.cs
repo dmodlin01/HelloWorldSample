@@ -16,20 +16,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Repositories;
+using AutoMapper;
 
 namespace HelloWorldWeb.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController<HomeController>
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IMessageRepository _repository;
-        private readonly MessageService _messageService;
-        public HomeController(ILogger<HomeController> logger, MessageService messageService, IMessageRepository repository)
-        {
-            _logger = logger;
-            _repository = repository;
-            _messageService = messageService;
-        }
+        public HomeController(ILogger<HomeController> logger, MessageService messageService, IMessageRepository repository, IMapper mapper) : base(logger, messageService, repository, mapper){}
 
         public async Task<IActionResult> Index()
         {
@@ -39,40 +32,17 @@ namespace HelloWorldWeb.Controllers
             //return View(messageVm);
             return View();
         }
-        [Authorize]
-        public async Task<IActionResult> GetMessages()
-        {
-            await WriteOutIdentityInformation();
-            ViewData["Title"] = "Hello World Web app";
-            try
-            {
-                var userId = 0;
-                if (User.Claims.Any(c => c.Type == "sub")) //check if the claim containing userID exists
-                {
-                    var idVal = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value ?? "0";
-                    userId = int.Parse(idVal);
-                }
-                var message = userId == 0 ? _messageService.GetLatestMessage() : _messageService.GetLatestMessageForUser(userId);
-                var messages = userId == 0
-                    ? _messageService.GetApplicableMessages()
-                    : _messageService.GetMessagesForUser(userId);
-                var messageVm = new MessageVM {LatestMessage  = message, RemainingMessages = messages.Where(m=>m.MessageId!=message.MessageId).ToList()};
-                return View("Index", messageVm);
-            }
-            catch (Exception e) when (e is AggregateException && e.InnerException is SecurityTokenExpiredException || e is UnauthorizedAccessException)
-            {
-                return RedirectToAction("AccessDenied", "Authorization");
-            }
-        }
         public async Task Logout()
         //public async Task<IActionResult> Logout()
         {
-            _logger.LogInformation("Logging out of the session.");
+            Logger.LogInformation("Logging out of the session.");
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme); //sign out by clearing app Cookies
             await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme); //sign out by having the OIDC cookie cleared.
             //return RedirectToAction(actionName: "Index", controllerName: "Home");
             //return View();
         }
+
+
         public IActionResult Privacy()
         {
             return View();
@@ -83,20 +53,6 @@ namespace HelloWorldWeb.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        public async Task WriteOutIdentityInformation()
-        {
-            // get the saved identity token
-            var identityToken = await HttpContext
-                .GetTokenAsync(OpenIdConnectParameterNames.IdToken);//retrieve the saved identity token
 
-            // write it out
-            Debug.WriteLine($"Identity token: {identityToken}");
-
-            // write out the user claims
-            foreach (var claim in User.Claims)
-            {
-                Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
-            }
-        }
     }
 }

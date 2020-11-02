@@ -57,7 +57,7 @@ namespace Repositories
             return Messages.Last(m => m.RecipientId == userId);
         }
 
-        public List<MessageDTO> GetApplicableMessages()
+        public List<MessageDTO> GetAvailableMessages()
         {
             return Messages;
         }
@@ -65,6 +65,16 @@ namespace Repositories
         public List<MessageDTO> GetUserMessages(int userId)
         {
             return Messages.Where(m => m.RecipientId == userId).ToList();
+        }
+
+        public void AddMessage(ref MessageDTO messageDTO)
+        {
+            if (messageDTO.MessageId == 0)
+            {
+                var messageID = Messages.Max(m => m.MessageId) + 1;
+                messageDTO.MessageId = messageID;
+            }
+            Messages.Add(messageDTO);
         }
     }
 }

@@ -47,13 +47,13 @@ namespace CatalogServices
             }
             return message;
         }
-        public List<MessageDTO> GetApplicableMessages()
+        public List<MessageDTO> GetAvailableMessages()
         {
             Logger?.LogInformation($"Using {this.GetType()} with {_messageRepository.GetType()} to retrieve message");
             List<MessageDTO> messages;
             try
             {
-                messages = _messageRepository.GetApplicableMessages();
+                messages = _messageRepository.GetAvailableMessages();
             }
             catch (Exception e)
             {

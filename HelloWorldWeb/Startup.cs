@@ -22,6 +22,8 @@ using HelloWorldWeb.HttpHandlers;
 using IdentityModel;
 using IdentityServer4;
 using Microsoft.IdentityModel.Tokens;
+using Repositories.EF;
+using Repositories.User;
 
 namespace HelloWorldWeb
 {
@@ -148,6 +150,7 @@ namespace HelloWorldWeb
             //services.AddScoped<IMessageRepository, EFMessageRepository>();
             services.AddScoped<MessageService, WebApiMessageService>();
             services.AddScoped<IUserInfoRepository, IDPUserInfoRepository>();
+            services.AddScoped<IUserRepository, EfUserRepository>();
         }
         /// <summary>
         ///  Method will load the configuration file and configure logging

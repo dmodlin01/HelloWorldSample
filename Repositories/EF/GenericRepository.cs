@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 namespace Repositories.EF
 {
@@ -14,7 +13,7 @@ namespace Repositories.EF
         public GenericRepository(DbContext context)
         {
             this.context = context;
-            this.dbSet = context.Set<TEntity>();
+            dbSet = context.Set<TEntity>();
         }
         public virtual IEnumerable<TEntity> Get(
             Expression<Func<TEntity, bool>> filter = null,
@@ -80,6 +79,10 @@ namespace Repositories.EF
         {
             dbSet.Attach(entityToUpdate);
             context.Entry(entityToUpdate).State = EntityState.Modified;
+        }
+        public virtual void SaveChanges()
+        {
+            context.SaveChanges();
         }
     }
 }

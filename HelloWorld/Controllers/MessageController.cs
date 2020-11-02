@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace HelloWorldWebAPI.Controllers
 {
+    [Route("[controller]")]
     [Route("[controller]/[Action]")]
     [ApiController]
     [Authorize] //service will be authorized
@@ -43,8 +44,9 @@ namespace HelloWorldWebAPI.Controllers
                 }
                 else
                     _logger.LogInformation("Firing the Message/Get");
-
-                message = userId == 0 ? _messageRepository.GetLatestMessage() : _messageRepository.GetLatestUserMessage(userId);
+                message = User.IsInRole("Admin")
+                    ? _messageRepository.GetLatestMessage()
+                    : userId != 0 ? _messageRepository.GetLatestUserMessage(userId) : null;
             }
             catch (Exception e)
             {
@@ -59,7 +61,7 @@ namespace HelloWorldWebAPI.Controllers
             MessageDTO message = null;
             try
             {
-               
+
                 if (User.Claims.Any())
                 {
                     var client = User.Claims.FirstOrDefault(c => c.Type == "client_id")?.Value;
@@ -84,7 +86,6 @@ namespace HelloWorldWebAPI.Controllers
         /// <returns>List of MessageDTO objects</returns>
         public IActionResult GetMessages()
         {
-
             List<MessageDTO> messages = null;
             try
             {
@@ -98,8 +99,9 @@ namespace HelloWorldWebAPI.Controllers
                 }
                 else
                     _logger.LogInformation("Firing the Messages/Get");
-
-                messages = userId == 0 ? _messageRepository.GetApplicableMessages() : _messageRepository.GetUserMessages(userId);
+                messages = User.IsInRole("Admin")
+                   ? _messageRepository.GetAvailableMessages()
+                   : userId != 0 ? _messageRepository.GetUserMessages(userId) : null;
             }
             catch (Exception e)
             {
@@ -132,5 +134,15 @@ namespace HelloWorldWebAPI.Controllers
             }
             return Ok(messages);
         }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult AddMessage(MessageDTO messageDTO)
+        {
+            _logger.LogInformation("Firing the Message/AddMessage");
+            _messageRepository.AddMessage(ref messageDTO);
+
+            return Ok(messageDTO); ;
+        }
+       
     }
 }

@@ -34,11 +34,11 @@ namespace Repositories
         public MessageDTO GetLatestUserMessage(int userId)
         {
             _logger?.LogInformation("Using EFMessageRepository to retrieve latest Message by user.");
-            var messageEnt = MessageRepository.Get(filter:m=>m.UserId==userId,orderBy:m=>m.OrderByDescending(ord=>ord.MessageId)).FirstOrDefault();
+            var messageEnt = MessageRepository.Get(filter: m => m.UserId == userId, orderBy: m => m.OrderByDescending(ord => ord.MessageId)).FirstOrDefault();
             return _mapper.Map<MessageDTO>(messageEnt);
         }
 
-        public List<MessageDTO> GetApplicableMessages()
+        public List<MessageDTO> GetAvailableMessages()
         {
             var messageEnts = MessageRepository.Get().ToList();
             return _mapper.Map<List<MessageDTO>>(messageEnts);
@@ -46,7 +46,7 @@ namespace Repositories
 
         public List<MessageDTO> GetUserMessages(int userId)
         {
-            var messageEnts = MessageRepository.Get(m=>m.UserId == userId);
+            var messageEnts = MessageRepository.Get(m => m.UserId == userId);
             return _mapper.Map<List<MessageDTO>>(messageEnts);
         }
 
@@ -54,6 +54,14 @@ namespace Repositories
         {
             var messageEnt = MessageRepository.GetById(id);
             return _mapper.Map<MessageDTO>(messageEnt);
+        }
+
+        public void AddMessage(ref MessageDTO messageDTO)
+        {
+            var messageEnt = _mapper.Map<MessageEnt>(messageDTO);
+            MessageRepository.Insert(messageEnt);
+            MessageRepository.SaveChanges();
+            messageDTO.MessageId = messageEnt.MessageId; //assign back the id
         }
     }
 }

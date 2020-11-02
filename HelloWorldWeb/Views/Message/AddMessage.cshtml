@@ -1,0 +1,31 @@
+﻿@model AddMessageVM
+
+<h2 class="leftMarginSmaller">Add Message</h2>
+@{ if (ViewBag.Error != null)
+    {
+<div class="text-warning">Error saving the message. @ViewBag.Error</div> } }
+
+<form asp-action="AddMessage" method="post" class="form-horizontal" role="form" enctype="multipart/form-data">
+
+    <div class="form-horizontal leftMarginDefault">
+        <div class="form-group">
+            <div>Message heading:</div>
+            <input asp-for="Message" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <div>Message body:</div>
+            <input asp-for="MessageBody" class="form-control" />
+        </div>
+
+        @*@Html.DropDownListFor(model => model.RecipientId, Model.Users, "Select user", new { @class = "form-control" })*@
+        @Html.DropDownListFor(model => model.RecipientId, Model.Users, "Select recipient", new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.RecipientId, "", new { @class = "text-danger" })
+    </div>
+        <div class="form-group">
+            <div>
+                <input type="submit" class="btn btn-primary" value="Add Message" />
+            </div>
+        </div>
+    </div>
+</form>
