@@ -19,16 +19,18 @@ namespace Dmitriy.IDP
                 new IdentityResources.Email(), //add e-mail information to support email scope
                 new IdentityResources.Address(), //add Address info to support address scope
                 new IdentityResources.Phone(),
-                new IdentityResource("roles","app roles", 
+                new IdentityResource("roles","app roles",
                     new List<string>{"role"}), //new roles resource to hold a list of role claims
+                new IdentityResource("userlevel","user level",
+                    new List<string>{"userlevel" })
             };
 
         public static IEnumerable<ApiScope> ApiScopes =>
             new[]
             {
                 new ApiScope("helloworldapi","Hello World API",
-                    new List<string>{"role"}
-                    ), 
+                    new List<string>{"role","userlevel"}
+                    )
             };
         public static IEnumerable<ApiResource> ApiResources =>
             new[]
@@ -48,27 +50,6 @@ namespace Dmitriy.IDP
         public static IEnumerable<Client> Clients =>
             new[]
             {
-                //new Client //list of clients that would have access to IDP
-                //{
-                //    ClientName = "Hello World API Client",
-                //    ClientId = "helloworldapi",
-                //    AllowedGrantTypes = GrantTypes.Code,
-                //    RequirePkce = true,
-                //    RedirectUris =
-                //    {
-                //        "http://localhost:52267/signin-oidc"
-                //    },
-                //    AllowedScopes = //the scope the client can access
-                //    {
-                //        IdentityServerConstants.StandardScopes.OpenId,
-                //        IdentityServerConstants.StandardScopes.Profile,
-                        
-                //    },
-                //    ClientSecrets =
-                //    {
-                //        new Secret("secret".Sha256())
-                //    }
-                //},
                 new Client //list of clients that would have access
                 {
                     //AccessTokenLifetime = 120,
@@ -94,7 +75,8 @@ namespace Dmitriy.IDP
                         IdentityServerConstants.StandardScopes.Email,
                         IdentityServerConstants.StandardScopes.Phone,
                         "roles", //role-based authorization
-                        "helloworldapi" //for authorizing the requests to the API
+                        "helloworldapi", //for authorizing the requests to the API
+                        "userlevel", //for attribute authorization
                     },
                     ClientSecrets =
                     {
@@ -104,7 +86,7 @@ namespace Dmitriy.IDP
 
             };
 
-        
-      
+
+
     }
 }

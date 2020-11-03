@@ -1,37 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using CatalogServices;
-using DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using HelloWorldWeb.Models;
-using HelloWorldWeb.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Repositories;
-using AutoMapper;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace HelloWorldWeb.Controllers
 {
     public class HomeController : BaseController<HomeController>
     {
-        public HomeController(ILogger<HomeController> logger, MessageService messageService, IMessageRepository repository, IMapper mapper) : base(logger, messageService, repository, mapper){}
+        public HomeController(ILogger<HomeController> logger, MessageService messageService, IMessageRepository repository, IMapper mapper) : base(logger, messageService, repository, mapper) { }
 
         public async Task<IActionResult> Index()
         {
             ViewData["Title"] = "Hello World Web app";
-            //var message = _messageService.GetMessage();
-            //var messageVm = new MessageVM {Caption = "Message of the day: ", Message = message};
-            //return View(messageVm);
             return View();
         }
+        [Authorize]
+        public async Task<IActionResult> Login()
+        {
+            ViewData["Title"] = "Hello World Web app";
+            return View("Index");
+        }
+
         public async Task Logout()
         //public async Task<IActionResult> Logout()
         {

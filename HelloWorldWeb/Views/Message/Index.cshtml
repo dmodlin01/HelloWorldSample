@@ -1,21 +1,29 @@
-﻿@using Microsoft.AspNetCore.Http
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
 @model MessageVM
 
 @if (Model != null)
 {
-    <h4 class="caption">Most recent message: </h4>
-    <div class="pull-right"><b>Heading: </b>@Model.LatestMessage.Message</div>
-    <p><b>Body: </b>@Model.LatestMessage?.MessageBody</p>
-    <hr />
-    <h4 class="caption">Other messages: </h4>
-
-    @foreach (var message in Model.RemainingMessages)
+    if (Model.LatestMessage == null)
     {
-        <div class="pull-right"><b>Heading: </b> @message.Message</div>
-        <p><b>Body: </b> @message.MessageBody</p>
+        <h4 class="caption">No messages</h4>
+    }
+    else
+    {
+        <h4 class="caption">Most recent message: </h4>
+        <div class="pull-right"><b>Heading: </b>@Model.LatestMessage.Message</div>
+        <p><b>Body: </b>@Model.LatestMessage?.MessageBody</p>
+        <hr />
+        <h4 class="caption">Other messages: </h4>
+
+        @foreach (var message in Model.RemainingMessages)
+        {
+            <div class="pull-right"><b>Heading: </b> @message.Message</div>
+            <p><b>Body: </b> @message.MessageBody</p>
+        }
     }
     <hr />
-    @if (User.IsInRole("Admin"))
+    @if ((await AuthorizationService.AuthorizeAsync(User, "CanAddMessage")).Succeeded)
     {
         <a asp-area="" asp-controller="Message" asp-action="AddMessage">Add message</a>
     }
@@ -24,11 +32,11 @@ else
 {
     @if (User.Identity.IsAuthenticated)
     {
-        <a asp-area="" asp-controller="Home" asp-action="GetMessages">Retrieve the message of the day.</a>
+        <a asp-area="" asp-controller="Home" asp-action="GetMessages">View the message of the day</a>
     }
     else
     {
-        <a asp-area="" asp-controller="Home" asp-action="GetMessages">Log in to retrieve the message of the day.</a>
+        <a asp-area="" asp-controller="Home" asp-action="GetMessages">Log in</a>
     }
 }
 

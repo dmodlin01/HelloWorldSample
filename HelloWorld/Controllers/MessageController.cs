@@ -55,6 +55,7 @@ namespace HelloWorldWebAPI.Controllers
             return Ok(message);
         }
         [Route("{id}")]
+        [Authorize(Policy = "CanViewSpecificMessage")]
         public IActionResult GetLatestUserMessage(int id)
         {
 
@@ -110,6 +111,7 @@ namespace HelloWorldWebAPI.Controllers
             return Ok(messages);
         }
         [Route("{id}")]
+        [Authorize(Policy = "CanViewSpecificMessage")]
         public IActionResult GetUserMessages(int id)
         {
 
@@ -135,7 +137,8 @@ namespace HelloWorldWebAPI.Controllers
             return Ok(messages);
         }
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        [Authorize(Policy = "CanAddMessage")]
         public IActionResult AddMessage(MessageDTO messageDTO)
         {
             _logger.LogInformation("Firing the Message/AddMessage");

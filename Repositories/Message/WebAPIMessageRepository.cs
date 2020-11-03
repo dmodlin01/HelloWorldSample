@@ -158,9 +158,9 @@ namespace Repositories
             else
             {
                 if (result.StatusCode == HttpStatusCode.Unauthorized || result.StatusCode == HttpStatusCode.Forbidden)
-                    throw new UnauthorizedAccessException(result.Content.ToString());
+                    throw new UnauthorizedAccessException(result.ToString());
                 else
-                    throw new Exception(result.Content.ToString());
+                    throw new Exception(result.ToString());
             }
             
         }

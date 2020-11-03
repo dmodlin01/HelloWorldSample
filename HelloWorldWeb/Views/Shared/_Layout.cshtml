@@ -1,4 +1,6 @@
-﻿@using IdentityServer4.Extensions
+﻿@using Microsoft.AspNetCore.Authorization
+@using IdentityServer4.Extensions
+@inject IAuthorizationService AuthorizationService
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +17,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HelloWorldWeb</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Hello World</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -23,21 +25,28 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-primary" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @if (User.IsInRole("Admin"))
+                        @*@if (User.IsInRole("Admin"))*@
+                        @if ((await AuthorizationService.AuthorizeAsync(User, "CanViewDeliveryInfo")).Succeeded)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="MessageDelivery" asp-action="GetMessageDeliveryInfo">Review Message Delivery</a>
+                                <a class="nav-link text-secondary" asp-area="" asp-controller="MessageDelivery" asp-action="GetMessageDeliveryInfo">Message Delivery Info</a>
+                            </li>
+                        }
+                        @if ((await AuthorizationService.AuthorizeAsync(User, "CanAddMessage")).Succeeded)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-secondary" asp-area="" asp-controller="Message" asp-action="AddMessage">Add Message</a>
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-primary" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                         @if (User.IsAuthenticated())
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a>
+                                <a class="nav-link text-primary" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a>
                             </li>
                         }
                     </ul>

@@ -22,6 +22,13 @@ namespace HelloWorldWeb.Controllers
     public class MessageController : BaseController<MessageController>
     {
         internal IUserRepository UserRepository;
+        private List<SelectListItem> _userItems;
+        internal List<SelectListItem> UserItems => _userItems ??= UserRepository.GetUsers()
+            .Select(u => new SelectListItem(u.FullName, u.UserId.ToString())).ToList();
+
+
+
+
         public MessageController(ILogger<MessageController> logger, MessageService messageService, IMessageRepository messageRepo, IMapper mapper, IUserRepository userRepo)
             : base(logger, messageService, messageRepo, mapper)
         {
@@ -58,23 +65,22 @@ namespace HelloWorldWeb.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        [Authorize(Policy = "CanAddMessage")]
         public IActionResult AddMessage()
         {
-            var users = UserRepository.GetUsers();
-            var userSelectListItems = users.Select(u => new SelectListItem(u.FullName, u.UserId.ToString())).ToList();
-            return View(new AddMessageVM() { Users = userSelectListItems });
+            return View(new AddMessageVM() { Users = UserItems });
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "CanAddMessage")]
         public IActionResult AddMessage(AddMessageVM addMessageVM)
         {
             if (!ModelState.IsValid)
             {
                 var users = UserRepository.GetUsers();
                 var userSelectListItems = users.Select(u => new SelectListItem(u.FullName, u.UserId.ToString())).ToList();
-                return View(new AddMessageVM() { Users = userSelectListItems });
+                return View(new AddMessageVM() { Users = UserItems });
             }
             var messageDTO = Mapper.Map<MessageDTO>(addMessageVM);
             try
@@ -85,7 +91,7 @@ namespace HelloWorldWeb.Controllers
             {
                 Logger.LogError(e.Message, e);
                 ViewBag.Error = $"Error: {e.Message}";
-                return View();
+                return View(new AddMessageVM() { Users = UserItems });
             }
             return RedirectToAction("GetMessages");
         }

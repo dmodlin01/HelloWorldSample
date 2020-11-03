@@ -45,7 +45,8 @@ namespace Dmitriy.IDP.Quickstart
                             new Claim(JwtClaimTypes.WebSite, "http://thesmiths.com"),
                             new Claim(JwtClaimTypes.Address, JsonConvert.SerializeObject(address), IdentityServerConstants.ClaimValueTypes.Json),
                             //new Claim (JwtClaimTypes.Role, "User"), //needed for Role Based Authorization
-                            new Claim (JwtClaimTypes.Role, "Admin")
+                            new Claim (JwtClaimTypes.Role, "Admin"),
+                            new Claim ("userlevel", "senior")
                         }
                     },
                     new TestUser
@@ -64,8 +65,27 @@ namespace Dmitriy.IDP.Quickstart
                             new Claim(JwtClaimTypes.WebSite, "http://thesmiths.com"),
                             new Claim(JwtClaimTypes.Address, JsonConvert.SerializeObject(address), IdentityServerConstants.ClaimValueTypes.Json),
                             new Claim (JwtClaimTypes.Role, "User"),
-                            //new Claim (JwtClaimTypes.Role, "Admin")
-                            
+                            new Claim ("userlevel", "mid")
+
+                        }
+                    },
+                    new TestUser
+                    {
+                        SubjectId = "2975890",
+                        Username = "john",
+                        Password = "doe",
+                        Claims =
+                        {
+                            new Claim(JwtClaimTypes.Name, "John Doe"),
+                            new Claim(JwtClaimTypes.GivenName, "John"),
+                            new Claim(JwtClaimTypes.FamilyName, "Doe"),
+                            new Claim(JwtClaimTypes.PhoneNumber,"847-277-5321"),
+                            new Claim(JwtClaimTypes.Email, "johndoe@email.com"),
+                            new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
+                            new Claim(JwtClaimTypes.WebSite, "http://unidentifieddoe.com"),
+                            new Claim(JwtClaimTypes.Address, JsonConvert.SerializeObject(address), IdentityServerConstants.ClaimValueTypes.Json),
+                            new Claim (JwtClaimTypes.Role, "PowerUser"),
+                            new Claim ("userlevel", "mid")
                         }
                     },
                 };

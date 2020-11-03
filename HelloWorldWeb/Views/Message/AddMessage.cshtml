@@ -9,19 +9,17 @@
 
     <div class="form-horizontal leftMarginDefault">
         <div class="form-group">
-            <div>Message heading:</div>
-            <input asp-for="Message" class="form-control" />
+            <input asp-for="Message" placeholder="Message heading" class="form-control"/>
         </div>
 
         <div class="form-group">
-            <div>Message body:</div>
-            <input asp-for="MessageBody" class="form-control" />
+            <input asp-for="MessageBody"  placeholder="Message body" class="form-control" />
         </div>
 
-        @*@Html.DropDownListFor(model => model.RecipientId, Model.Users, "Select user", new { @class = "form-control" })*@
-        @Html.DropDownListFor(model => model.RecipientId, Model.Users, "Select recipient", new { @class = "form-control" })
-        @Html.ValidationMessageFor(model => model.RecipientId, "", new { @class = "text-danger" })
-    </div>
+        <div class="form-group">
+            @Html.DropDownListFor(model => model.RecipientId, Model.Users, "Select recipient", new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.RecipientId, "", new { @class = "text-danger" })
+        </div>
         <div class="form-group">
             <div>
                 <input type="submit" class="btn btn-primary" value="Add Message" />

@@ -2,23 +2,16 @@
 using DTOs;
 using HelloWorldWeb.Models;
 using HelloWorldWeb.ViewModels;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Repositories;
+using System.Linq;
 
 namespace HelloWorldWeb.Controllers
 {
-    [Authorize]
+   
     public class MessageDeliveryController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -27,18 +20,18 @@ namespace HelloWorldWeb.Controllers
 
         public MessageDeliveryController(ILogger<HomeController> logger, IMapper mapper, IUserInfoRepository userInfoRepository)
         {
-            //_httpClientFactory = httpClientFactory ??
-            //                     throw new ArgumentNullException(nameof(httpClientFactory));
             _logger = logger;
             _mapper = mapper;
             _userInfoRepository = userInfoRepository;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        [Authorize(Policy = "CanViewDeliveryInfo")]
         public IActionResult GetMessageDeliveryInfo()
         {
+            _logger.LogInformation("GetMessageDeliveryInfo fired");
             var fullName = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
-            var claims =  _userInfoRepository.RetrieveUserInfoClaims();
+            var claims = _userInfoRepository.RetrieveUserInfoClaims();
             var address = claims.FirstOrDefault(c => c.Type == "address")?.Value;
             var phone = claims
                 .FirstOrDefault(c => c.Type == "phone_number")?.Value;

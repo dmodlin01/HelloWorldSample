@@ -1,29 +1,29 @@
-using AutoMap;
 using AutoMapper;
 using CatalogServices;
+using HelloWorldWeb.AutoMap;
+using HelloWorldWeb.HttpHandlers;
+using IdentityModel;
+using IdentityServer4;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Repositories;
+using Repositories.EF;
+using Repositories.User;
 using Serilog;
 using Serilog.Formatting.Compact;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
-using HelloWorldWeb.AutoMap;
-using HelloWorldWeb.HttpHandlers;
-using IdentityModel;
-using IdentityServer4;
-using Microsoft.IdentityModel.Tokens;
-using Repositories.EF;
-using Repositories.User;
 
 namespace HelloWorldWeb
 {
@@ -43,17 +43,22 @@ namespace HelloWorldWeb
         {
             //wire Services and Repositories for DI
             RegisterServicesAndRepositories(services);
+
             services.AddControllersWithViews()
                  .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
-
+            //Add Attribute-based authorization
+            AddAuthorization(services);
             services.AddHttpContextAccessor(); //needed to inject IHttpContextAccessor
+
             services.AddTransient<BearerTokenHandler>(); //add the delegating handler to provision requests with the BearerToken (access token)
+            //Add Identity Server Client
             services.AddHttpClient("IDPClient", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:5001/");
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
             });
+            //add Web Api client
             services.AddHttpClient("HelloWorldApiClient", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:44349/");
@@ -85,7 +90,9 @@ namespace HelloWorldWeb
                     options.Scope.Add(IdentityServerConstants.StandardScopes.Phone);
                     options.Scope.Add("roles"); //Add roles scope (Identity Resource) to bring the user roles
                     options.Scope.Add("helloworldapi"); //add scope for API
+                    options.Scope.Add("userlevel"); //Add userlevel scope (Identity Resource) to bring the userlevel claim (needed for attribute-based authorization)
                     options.ClaimActions.MapUniqueJsonKey("role", "role"); //create a mapping for the role claims
+                    options.ClaimActions.MapUniqueJsonKey("userlevel", "userlevel");
                     //options.ClaimActions.Remove("nbf"); //remove the filter for the not before claim
                     //options.Scope.Add("imagegalleryapi");
                     //options.Scope.Add("subscriptionlevel");
@@ -107,6 +114,7 @@ namespace HelloWorldWeb
                         RoleClaimType = JwtClaimTypes.Role
                     };
                 });
+
             //wire AutoMapper for injection
             services.AddAutoMapper(c => c.AddProfile<HelloWorldWebMappingProfile>(), typeof(Startup));
             //wire EF db context
@@ -168,6 +176,78 @@ namespace HelloWorldWeb
                 .WriteTo.Console()
                 .CreateLogger();
             Log.Logger.Information("Wired Logging for HelloWorldWeb");
+        }
+
+        /// <summary>
+        /// Configure and add attribute-based authorization
+        /// </summary>
+        /// <param name="services"></param>
+        private static void AddAuthorization(IServiceCollection services)
+        {
+            var authSchemes = new[] { CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme };
+            var canAddMessagePolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                  //.RequireRole("Admin")
+                  .RequireAssertion(ctx =>
+                  {
+                      return ctx.User.HasClaim("role", "Admin") ||
+                             ctx.User.HasClaim("userlevel", "senior") ||
+                             ctx.User.HasClaim("userlevel", "mid");
+                  })
+                  .Build();
+
+            var canEditMessagePolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                //.RequireRole("Admin")
+                .RequireAssertion(ctx =>
+                  {
+                      return ctx.User.HasClaim("role", "Admin") ||
+                             ctx.User.HasClaim("userlevel", "senior") ||
+                             (ctx.User.HasClaim("role", "PowerUser") && ctx.User.HasClaim("userlevel", "mid"));
+                  })
+                .Build();
+
+            var canDeleteMessagePolicy = new AuthorizationPolicyBuilder() //only admins or senior powerusers should be able to delete
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                 .RequireAssertion(ctx =>
+                  {
+                      return ctx.User.HasClaim("role", "Admin") ||
+                             (ctx.User.HasClaim("role", "PowerUser") && ctx.User.HasClaim("userlevel", "senior"));
+                  })
+                .Build();
+
+            var canManageUsersPolicy = new AuthorizationPolicyBuilder() //only admins with mid/senior level can manage users
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                .RequireRole("Admin")
+                .RequireAssertion(ctx =>
+                {
+                    return ctx.User.HasClaim("userlevel", "mid") || ctx.User.HasClaim("userlevel", "senior");
+                })
+               .Build();
+
+            var canViewDeliveryInfoPolicy = new AuthorizationPolicyBuilder() //only admins with mid/senior level can manage users
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                .RequireAssertion(ctx =>
+                {
+                    return ctx.User.HasClaim("role", "Admin") ||
+                          (ctx.User.HasClaim("role", "PowerUser") && ctx.User.HasClaim("userlevel", "mid") || ctx.User.HasClaim("userlevel", "senior"));
+                })
+               .Build();
+
+            //add Policy Authorization
+            services.AddAuthorization(authOpt =>
+            {
+                authOpt.AddPolicy("CanAddMessage", canAddMessagePolicy);
+                authOpt.AddPolicy("CanEditMessage", canEditMessagePolicy);
+                authOpt.AddPolicy("CanDeleteMessage", canDeleteMessagePolicy);
+                authOpt.AddPolicy("CanViewDeliveryInfo", canViewDeliveryInfoPolicy);
+                authOpt.AddPolicy("CanManageUsers", canManageUsersPolicy);
+            });
         }
     }
 }

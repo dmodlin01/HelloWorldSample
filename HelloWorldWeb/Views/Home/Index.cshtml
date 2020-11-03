@@ -3,11 +3,11 @@
 
 @if (Context.User.Identity.IsAuthenticated)
 {
-    <a asp-area="" asp-controller="Message" asp-action="GetMessages">Retrieve the message of the day.</a>
+    <a asp-area="" asp-controller="Message" asp-action="GetMessages">View the message of the day</a>
 }
 else
 {
-    <a asp-area="" asp-controller="Message" asp-action="GetMessages">Log in to retrieve the message of the day.</a>
+    <a asp-area="" asp-controller="Home" asp-action="Login">Log in</a>
 }
 
 

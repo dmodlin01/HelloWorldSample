@@ -2,7 +2,11 @@ using System.IO;
 using System.Linq;
 using AutoMap;
 using AutoMapper;
+using HelloWorldWebAPI.Authorization;
 using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +25,7 @@ namespace HelloWorldWebAPI
         public Startup(IConfiguration configuration)
         {
             //When testing via xUnit, the configuration would not be loaded (and the appsettings.json would not be available), as such need to build/load it
-            if (!((ConfigurationRoot) configuration).Providers.Any(p => p is JsonConfigurationProvider))
+            if (!((ConfigurationRoot)configuration).Providers.Any(p => p is JsonConfigurationProvider))
             {
                 configuration = GetConfiguration();
             }
@@ -57,7 +61,9 @@ namespace HelloWorldWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddJsonOptions(o=>o.JsonSerializerOptions.PropertyNamingPolicy = null);
+            services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.PropertyNamingPolicy = null);
+            AddAuthorization(services);
+            services.AddHttpContextAccessor(); //needed to inject IHttpContextAccessor
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme) //use Bearer token authentication
                 .AddIdentityServerAuthentication(o =>
                 {
@@ -68,12 +74,12 @@ namespace HelloWorldWebAPI
                 });
             //wire EF db context
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"),b=>b.MigrationsAssembly("Repositories"))
+                options.UseSqlServer(Configuration.GetConnectionString("HelloWorldConnection"), b => b.MigrationsAssembly("Repositories"))
             );
             //wire AutoMapper for injection
-            services.AddAutoMapper(c=>c.AddProfile<AutoMappingProfile>(),typeof(Startup));
+            services.AddAutoMapper(c => c.AddProfile<AutoMappingProfile>(), typeof(Startup));
             RegisterRepositories(services);
-            
+
         }
         private static void RegisterRepositories(IServiceCollection services)
         {
@@ -100,12 +106,11 @@ namespace HelloWorldWebAPI
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {   
+        {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseHttpsRedirection(); //redirect to https
             app.UseStatusCodePages(); //adds support for text-only headers http Status codes (i.e. 400/404/500 and etc)
             app.UseRouting();
@@ -124,7 +129,59 @@ namespace HelloWorldWebAPI
                 //    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
+        private static void AddAuthorization(IServiceCollection services)
+        {
+            var authSchemes = new[] { IdentityServerAuthenticationDefaults.AuthenticationScheme };
+            var canAddMessagePolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                  .RequireAssertion(ctx =>
+                  {
+                      return ctx.User.HasClaim("role", "Admin") ||
+                             ctx.User.HasClaim("userlevel", "senior") ||
+                             ctx.User.HasClaim("userlevel", "mid");
+                  })
+                  .Build();
+
+            var canEditMessagePolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                .RequireAssertion(ctx =>
+                {
+                    return ctx.User.HasClaim("role", "Admin") ||
+                           ctx.User.HasClaim("userlevel", "senior") ||
+                           (ctx.User.HasClaim("role", "PowerUser") && ctx.User.HasClaim("userlevel", "mid"));
+                })
+                .Build();
+
+            var canDeleteMessagePolicy = new AuthorizationPolicyBuilder() //only admins or senior powerusers should be able to delete
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                 .RequireAssertion(ctx =>
+                 {
+                     return ctx.User.HasClaim("role", "Admin") ||
+                            (ctx.User.HasClaim("role", "PowerUser") && ctx.User.HasClaim("userlevel", "senior"));
+                 })
+                .Build();
+
+            var canViewSpecificMessagePolicy = new AuthorizationPolicyBuilder() //only admins or senior powerusers should be able to delete
+                .AddAuthenticationSchemes(authSchemes)
+                .RequireAuthenticatedUser()
+                 .AddRequirements(new MustBeMessageRecipientRequirement())
+                .Build();
+
+            services.AddScoped<IAuthorizationHandler, MustBeMessageRecipientHandler>(); //register the custom auth handler
+            //add Policy Authorization
+            services.AddAuthorization(authOpt =>
+            {
+                authOpt.AddPolicy("CanAddMessage", canAddMessagePolicy);
+                authOpt.AddPolicy("CanEditMessage", canEditMessagePolicy);
+                authOpt.AddPolicy("CanDeleteMessage", canDeleteMessagePolicy);
+                authOpt.AddPolicy("CanViewSpecificMessage", canViewSpecificMessagePolicy);
+
+            });
+        }
     }
 
-    
+
 }
