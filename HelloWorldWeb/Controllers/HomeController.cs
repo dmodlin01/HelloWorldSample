@@ -15,15 +15,16 @@ namespace HelloWorldWeb.Controllers
 {
     public class HomeController : BaseController<HomeController>
     {
-        public HomeController(ILogger<HomeController> logger, MessageService messageService, IMessageRepository repository, IMapper mapper) : base(logger, messageService, repository, mapper) { }
+        public HomeController(ILogger<HomeController> logger, MessageService messageService, IMessageRepository repository, IMapper mapper, IAuthorizationService authorizationService) : 
+            base(logger, messageService, repository, mapper, authorizationService) { }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             ViewData["Title"] = "Hello World Web app";
             return View();
         }
         [Authorize]
-        public async Task<IActionResult> Login()
+        public IActionResult Login()
         {
             ViewData["Title"] = "Hello World Web app";
             return View("Index");

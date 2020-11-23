@@ -33,7 +33,7 @@ namespace HelloWorldWeb
         {
             Configuration = configuration;
             WireLogging(configuration);
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); //remove the mapping of claims
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); //remove the default mapping of claims
         }
 
         public IConfiguration Configuration { get; }
@@ -41,6 +41,7 @@ namespace HelloWorldWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             //wire Services and Repositories for DI
             RegisterServicesAndRepositories(services);
 
@@ -49,6 +50,7 @@ namespace HelloWorldWeb
             //Add Attribute-based authorization
             AddAuthorization(services);
             services.AddHttpContextAccessor(); //needed to inject IHttpContextAccessor
+            services.AddSession(); //add support for Session
 
             services.AddTransient<BearerTokenHandler>(); //add the delegating handler to provision requests with the BearerToken (access token)
             //Add Identity Server Client
@@ -81,7 +83,7 @@ namespace HelloWorldWeb
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.Authority = "https://localhost:5001/"; //auth server (IDP)
                     options.ClientId = "helloworldwebclient";
-                    options.ResponseType = "code";
+                    options.ResponseType = "code"; //determines what authorization flow should be used (code/hybrid)
                     //options.UsePkce = true; //default setting
                     options.Scope.Add(IdentityServerConstants.StandardScopes.OpenId); //default value
                     options.Scope.Add(IdentityServerConstants.StandardScopes.Profile); //default value
@@ -94,10 +96,7 @@ namespace HelloWorldWeb
                     options.ClaimActions.MapUniqueJsonKey("role", "role"); //create a mapping for the role claims
                     options.ClaimActions.MapUniqueJsonKey("userlevel", "userlevel");
                     //options.ClaimActions.Remove("nbf"); //remove the filter for the not before claim
-                    //options.Scope.Add("imagegalleryapi");
-                    //options.Scope.Add("subscriptionlevel");
-                    //options.Scope.Add("country");
-                    //options.Scope.Add("offline_access");
+                    options.Scope.Add("offline_access"); //requesting the scope to support the refresh token process
                     options.ClaimActions.Remove("phone_number"); //remove session id claim
                     options.ClaimActions.DeleteClaim("sid"); //remove session id claim
                     options.ClaimActions.DeleteClaim("idp"); //remove the idp claim
@@ -138,6 +137,7 @@ namespace HelloWorldWeb
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseSession(); //middleware for adding session support
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -228,6 +228,23 @@ namespace HelloWorldWeb
                     return ctx.User.HasClaim("userlevel", "mid") || ctx.User.HasClaim("userlevel", "senior");
                 })
                .Build();
+            var canViewMessagesPolicy = new AuthorizationPolicyBuilder() //only admins with mid/senior level can see all messages
+             .AddAuthenticationSchemes(authSchemes)
+             .RequireAuthenticatedUser()
+             //.RequireAssertion(ctx =>
+             //{
+             //    return ctx.User.HasClaim("userlevel", "mid") || ctx.User.HasClaim("userlevel", "senior");
+             //})
+            .Build();
+            var canViewAllMessagesPolicy = new AuthorizationPolicyBuilder() //only admins with mid/senior level can see all messages
+             .AddAuthenticationSchemes(authSchemes)
+             .RequireAuthenticatedUser()
+             .RequireRole("Admin")
+             .RequireAssertion(ctx =>
+             {
+                 return ctx.User.HasClaim("userlevel", "mid") || ctx.User.HasClaim("userlevel", "senior");
+             })
+            .Build();
 
             var canViewDeliveryInfoPolicy = new AuthorizationPolicyBuilder() //only admins with mid/senior level can manage users
                 .AddAuthenticationSchemes(authSchemes)
@@ -247,6 +264,8 @@ namespace HelloWorldWeb
                 authOpt.AddPolicy("CanDeleteMessage", canDeleteMessagePolicy);
                 authOpt.AddPolicy("CanViewDeliveryInfo", canViewDeliveryInfoPolicy);
                 authOpt.AddPolicy("CanManageUsers", canManageUsersPolicy);
+                authOpt.AddPolicy("CanViewAllMessages", canViewAllMessagesPolicy);
+                authOpt.AddPolicy("CanViewMessages", canViewMessagesPolicy);
             });
         }
     }

@@ -29,8 +29,8 @@ namespace HelloWorldWeb.Controllers
 
 
 
-        public MessageController(ILogger<MessageController> logger, MessageService messageService, IMessageRepository messageRepo, IMapper mapper, IUserRepository userRepo)
-            : base(logger, messageService, messageRepo, mapper)
+        public MessageController(ILogger<MessageController> logger, MessageService messageService, IMessageRepository messageRepo, IMapper mapper, IUserRepository userRepo, IAuthorizationService authorizationService)
+            : base(logger, messageService, messageRepo, mapper, authorizationService)
         {
             UserRepository = userRepo;
         }
@@ -53,16 +53,34 @@ namespace HelloWorldWeb.Controllers
                 }
                 var message = userId == 0 ? MessageService.GetLatestMessage() : MessageService.GetLatestMessageForUser(userId);
 
-                var messages = User.IsInRole("Admin") ? MessageService.GetAvailableMessages() :
+                var allowed = await AuthorizationService.AuthorizeAsync(User, "CanViewAllMessages");
+
+                var messages = allowed.Succeeded ? MessageService.GetAvailableMessages() :
                     userId != 0 ? MessageService.GetMessagesForUser(userId) : new List<MessageDTO>();
 
-                var messageVm = new MessageVM { LatestMessage = message, RemainingMessages = messages.Where(m => m.MessageId != message.MessageId).ToList() };
+                var messageVm = new MessagesVM { LatestMessage = message, RemainingMessages = messages.Where(m => m.MessageId != message.MessageId).ToList() };
+                if (messageVm.LatestMessage == null)
+                    messageVm.addMessageVM = new AddMessageVM() { Users = UserItems };
                 return View("Index", messageVm);
             }
             catch (Exception e) when (e is AggregateException && e.InnerException is SecurityTokenExpiredException || e is UnauthorizedAccessException)
             {
                 return RedirectToAction("AccessDenied", "Authorization");
             }
+        }
+
+        [Authorize]
+        public IActionResult Details(int id)
+        {
+            var message = MessageService.GetMessageById(id);
+            var messageVm = Mapper.Map<MessageVM>(message);
+
+            if (message.RecipientId.HasValue)
+                messageVm.Recipient = UserRepository.GetUser(message.RecipientId.Value);
+
+            return View(messageVm);
+
+
         }
 
         //[Authorize(Roles = "Admin")]
@@ -76,6 +94,7 @@ namespace HelloWorldWeb.Controllers
         [Authorize(Policy = "CanAddMessage")]
         public IActionResult AddMessage(AddMessageVM addMessageVM)
         {
+
             if (!ModelState.IsValid)
             {
                 var users = UserRepository.GetUsers();

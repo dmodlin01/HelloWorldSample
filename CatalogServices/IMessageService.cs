@@ -77,5 +77,21 @@ namespace CatalogServices
             }
             return messages;
         }
+
+        public MessageDTO GetMessageById(int messageId)
+        {
+            Logger?.LogInformation($"Using {this.GetType()} with {_messageRepository.GetType()} to retrieve message");
+            MessageDTO message;
+            try
+            {
+                message = _messageRepository.GetMessageById(messageId);
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError(e.Message, e);
+                throw;
+            }
+            return message;
+        }
     }
 }

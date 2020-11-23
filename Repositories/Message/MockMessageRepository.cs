@@ -76,5 +76,10 @@ namespace Repositories
             }
             Messages.Add(messageDTO);
         }
+
+        public MessageDTO GetMessageById(int messageId)
+        {
+            return Messages.FirstOrDefault(m => m.MessageId == messageId);
+        }
     }
 }

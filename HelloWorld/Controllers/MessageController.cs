@@ -27,7 +27,7 @@ namespace HelloWorldWebAPI.Controllers
             _messageRepository = repository;
             _mapper = mapper;
         }
-
+        [HttpGet]
         public IActionResult GetLatestMessage()
         {
 
@@ -54,9 +54,13 @@ namespace HelloWorldWebAPI.Controllers
             }
             return Ok(message);
         }
-        [Route("{id}")]
+
+
+        
+        [HttpGet("GetLatestUserMessageById/{userid}")]
+        //[Route("GetLatestUserMessageById")]
         [Authorize(Policy = "CanViewSpecificMessage")]
-        public IActionResult GetLatestUserMessage(int id)
+        public IActionResult GetLatestUserMessageById(int userid)
         {
 
             MessageDTO message = null;
@@ -72,7 +76,33 @@ namespace HelloWorldWebAPI.Controllers
                 else
                     _logger.LogInformation("Firing the Message/Get");
 
-                message = _messageRepository.GetLatestUserMessage(id);
+                message = _messageRepository.GetLatestUserMessage(userid);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e);
+            }
+            return Ok(message);
+        }
+
+        [HttpGet("{messageId}")]
+        public IActionResult GetMessageById(int messageId)
+        {
+
+            MessageDTO message = null;
+            try
+            {
+
+                if (User.Claims.Any())
+                {
+                    var client = User.Claims.FirstOrDefault(c => c.Type == "client_id")?.Value;
+                    var userIdVal = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                    _logger.LogInformation($"UserId {userIdVal} originating from {client} is firing the Message/GetMessageById");
+                }
+                else
+                    _logger.LogInformation("Firing the Message/Get");
+
+                message = _messageRepository.GetMessageById(messageId);
             }
             catch (Exception e)
             {
@@ -85,6 +115,8 @@ namespace HelloWorldWebAPI.Controllers
         ///Otherwise return all messages.
         /// </summary>
         /// <returns>List of MessageDTO objects</returns>
+        [HttpGet]
+        [Route("GetMessages")]
         public IActionResult GetMessages()
         {
             List<MessageDTO> messages = null;
@@ -105,14 +137,15 @@ namespace HelloWorldWebAPI.Controllers
                    : userId != 0 ? _messageRepository.GetUserMessages(userId) : null;
             }
             catch (Exception e)
-            {
-                _logger.LogError(e.Message, e);
-            }
-            return Ok(messages);
-        }
-        [Route("{id}")]
+           {
+               _logger.LogError(e.Message, e);
+           }
+           return Ok(messages);
+       }
+
+        [HttpGet("{userid}")]
         [Authorize(Policy = "CanViewSpecificMessage")]
-        public IActionResult GetUserMessages(int id)
+        public IActionResult GetUserMessages(int userid)
         {
 
             List<MessageDTO> messages = null;
@@ -128,7 +161,7 @@ namespace HelloWorldWebAPI.Controllers
                 else
                     _logger.LogInformation("Firing the Messages/Get");
 
-                messages = _messageRepository.GetUserMessages(id);
+                messages = _messageRepository.GetUserMessages(userid);
             }
             catch (Exception e)
             {
@@ -139,13 +172,13 @@ namespace HelloWorldWebAPI.Controllers
         [HttpPost]
         //[Authorize(Roles = "Admin")]
         [Authorize(Policy = "CanAddMessage")]
-        public IActionResult AddMessage(MessageDTO messageDTO)
+        public IActionResult AddMessage([FromBody] MessageDTO messageDTO)
         {
             _logger.LogInformation("Firing the Message/AddMessage");
             _messageRepository.AddMessage(ref messageDTO);
 
             return Ok(messageDTO); ;
         }
-       
+
     }
 }

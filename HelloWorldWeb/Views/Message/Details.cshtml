@@ -1,0 +1,11 @@
+﻿@model MessageVM
+
+<h6 class="caption">Message Details:</h6>
+<div class="container">
+    <div class="text"><b>Heading: </b>@Model.Message</div>
+    <div class="text"><b>Body: </b>@Model.MessageBody</div>
+    <div class="text"><b>Recipient: </b>@Model.Recipient?.FullName</div>
+</div>
+
+
+

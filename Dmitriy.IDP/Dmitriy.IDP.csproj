@@ -5,6 +5,7 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="bootstrap.sass" Version="4.5.3" />
     <PackageReference Include="IdentityServer4" Version="4.1.1" />
 
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />

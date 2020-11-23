@@ -1,11 +1,7 @@
-using System.IO;
-using System.Linq;
 using AutoMap;
 using AutoMapper;
 using HelloWorldWebAPI.Authorization;
 using IdentityServer4.AccessTokenValidation;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,6 +13,9 @@ using Microsoft.Extensions.Hosting;
 using Repositories;
 using Serilog;
 using Serilog.Formatting.Compact;
+using System.IO;
+using System.Linq;
+using Microsoft.OpenApi.Models;
 
 namespace HelloWorldWebAPI
 {
@@ -61,6 +60,15 @@ namespace HelloWorldWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //swagger
+            services.AddMvc();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "HelloWorldWebAPI", Version = "v1" });
+            });
+            services.AddSwaggerGenNewtonsoftSupport(); // explicit opt-in - needs to be placed after AddSwaggerGen()
+           
+
             services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.PropertyNamingPolicy = null);
             AddAuthorization(services);
             services.AddHttpContextAccessor(); //needed to inject IHttpContextAccessor
@@ -107,6 +115,7 @@ namespace HelloWorldWebAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -127,6 +136,12 @@ namespace HelloWorldWebAPI
                 //endpoints.MapControllerRoute(
                 //    name: "default",
                 //    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+            //swagger
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "HelloWorldWebAPI V1");
             });
         }
         private static void AddAuthorization(IServiceCollection services)

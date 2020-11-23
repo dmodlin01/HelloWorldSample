@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CatalogServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Repositories;
@@ -12,12 +13,14 @@ namespace HelloWorldWeb.Controllers
         internal readonly IMessageRepository MessageRepository;
         internal readonly MessageService MessageService;
         internal readonly IMapper Mapper;
-        public BaseController(ILogger<T> logger, MessageService messageService, IMessageRepository repository, IMapper mapper)
+        internal readonly IAuthorizationService AuthorizationService;
+        public BaseController(ILogger<T> logger, MessageService messageService, IMessageRepository repository, IMapper mapper, IAuthorizationService authorizationService)
         {
             Logger = logger;
             MessageRepository = repository;
             MessageService = messageService;
             Mapper = mapper;
+            AuthorizationService = authorizationService;
         }
     }
 }

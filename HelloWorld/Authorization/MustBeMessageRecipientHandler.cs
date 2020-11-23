@@ -29,14 +29,15 @@ namespace HelloWorldWebAPI.Authorization
                 return Task.CompletedTask;
             }
 
-            var requestorId = context.User.Claims.FirstOrDefault(c => c.Type == "sub").Value;
+            var requestorId = context.User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
             if (!int.TryParse(requestorId, out int requestorIdAsInt))
             {
                 context.Fail();
                 return Task.CompletedTask;
             }
-
-            var recipientId = _httpContextAccessor.HttpContext.GetRouteValue("id").ToString();
+            var recipientId = "";
+            if (_httpContextAccessor.HttpContext.GetRouteData().Values.Keys.Contains("userid"))
+                recipientId = _httpContextAccessor.HttpContext.GetRouteValue("userid").ToString();
             if (!int.TryParse(recipientId, out int recipientIdAsInt))
             {
                 context.Fail();

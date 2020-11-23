@@ -1,32 +1,38 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @inject IAuthorizationService AuthorizationService
-@model MessageVM
+@model MessagesVM
 
 @if (Model != null)
 {
     if (Model.LatestMessage == null)
     {
         <h4 class="caption">No messages</h4>
+        <hr />
+        @if ((await AuthorizationService.AuthorizeAsync(User, "CanAddMessage")).Succeeded)
+        {
+            @Html.Partial("_AddMessage", Model.addMessageVM);
+        }
     }
     else
     {
         <h4 class="caption">Most recent message: </h4>
-        <div class="pull-right"><b>Heading: </b>@Model.LatestMessage.Message</div>
+        <div class="pull-right"><b>Heading: </b><a asp-controller="Message" asp-action="Details" asp-route-id="@Model.LatestMessage.MessageId">@Model.LatestMessage.Message</a></div>
         <p><b>Body: </b>@Model.LatestMessage?.MessageBody</p>
         <hr />
         <h4 class="caption">Other messages: </h4>
 
         @foreach (var message in Model.RemainingMessages)
         {
-            <div class="pull-right"><b>Heading: </b> @message.Message</div>
+            <div class="pull-right"><b>Heading: </b><a asp-controller="Message" asp-action="Details" asp-route-id="@message.MessageId">@message.Message</a></div>
             <p><b>Body: </b> @message.MessageBody</p>
         }
+        <hr />
+        @if ((await AuthorizationService.AuthorizeAsync(User, "CanAddMessage")).Succeeded)
+        {
+            <a asp-area="" asp-controller="Message" asp-action="AddMessage">Add message</a>
+        }
     }
-    <hr />
-    @if ((await AuthorizationService.AuthorizeAsync(User, "CanAddMessage")).Succeeded)
-    {
-        <a asp-area="" asp-controller="Message" asp-action="AddMessage">Add message</a>
-    }
+
 }
 else
 {

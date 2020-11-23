@@ -1,0 +1,12 @@
+﻿@model MessageSummaryVM
+@if (Model.Messages?.Count != null && Model.Messages.Count > 0)
+{
+    <li class="nav-item">
+        <a class="text-primary nav-link" asp-controller="Message" asp-action="GetMessages">
+            <span class="oi oi-envelope-open"></span>
+            <span class="text-black-50">
+                @Model.Messages?.Count
+            </span>
+        </a>
+    </li>
+}

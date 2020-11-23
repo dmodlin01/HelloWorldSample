@@ -3,7 +3,6 @@
 
 
 using Dmitriy.IDP.Quickstart;
-using IdentityServerHost.Quickstart.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +34,7 @@ namespace Dmitriy.IDP
                 .AddInMemoryApiResources(Config.ApiResources)
                 .AddInMemoryClients(Config.Clients)
                 .AddTestUsers(TestUsers.Users); //Add the user(s) listed in TestUsers to authenticate and authorize
-                
+
 
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
@@ -51,7 +50,7 @@ namespace Dmitriy.IDP
             // uncomment if you want to add MVC
             app.UseStaticFiles(); //needed by ui assets
             app.UseRouting(); //used by end points
-            
+
             app.UseIdentityServer();
 
             // uncomment, if you want to add MVC

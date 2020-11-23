@@ -1,14 +1,20 @@
-﻿using System;
+﻿using DTOs;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DTOs;
+using System.ComponentModel.DataAnnotations;
 
 namespace HelloWorldWeb.ViewModels
 {
     public class MessageVM
     {
-        public MessageDTO LatestMessage;
-        public List<MessageDTO> RemainingMessages;
+        public int MessageId { get; set; }
+
+        public string Message { get; set; }
+
+        public string MessageBody { get; set; }
+
+        public string RecipientId { get; set; }
+
+        public UserDTO Recipient { get; set; }
     }
 }

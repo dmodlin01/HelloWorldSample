@@ -27,6 +27,9 @@ namespace Repositories
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
         }
+
+
+
         public MessageDTO GetLatestMessage()
         {
             _logger?.LogInformation("Using WebApiMessageRepository to retrieve Message.");
@@ -56,12 +59,8 @@ namespace Repositories
         {
             _logger?.LogInformation("Using WebApiMessageRepository to retrieve Message.");
             var message = new MessageDTO();
-
-
             var client = _httpClientFactory.CreateClient("HelloWorldApiClient");
-            //client.DefaultRequestHeaders.Authorization =  new AuthenticationHeaderValue("Bearer", AccessToken);
-            //client.DefaultRequestHeaders.Add("Bearer", AccessToken);
-            var responseTask = client.GetAsync($"/message/getlatestusermessage/{userId}");
+            var responseTask = client.GetAsync($"/message/getlatestusermessagebyid/{userId}");
             responseTask.Wait();
 
             var result = responseTask.Result;
@@ -78,6 +77,29 @@ namespace Repositories
             }
             return message;
         }
+        public MessageDTO GetMessageById(int messageId)
+        {
+            _logger?.LogInformation("Using WebApiMessageRepository to retrieve Message.");
+            var message = new MessageDTO();
+            var client = _httpClientFactory.CreateClient("HelloWorldApiClient");
+            var responseTask = client.GetAsync($"/message/getmessagebyid/{messageId}");
+            responseTask.Wait();
+
+            var result = responseTask.Result;
+            if (result.IsSuccessStatusCode)
+            {
+                var readTask = result.Content.ReadAsStringAsync();
+                readTask.Wait();
+                var resultMessage = readTask.Result;
+                message = JsonConvert.DeserializeObject<MessageDTO>(resultMessage);
+            }
+            else if (result.StatusCode == HttpStatusCode.Unauthorized || result.StatusCode == HttpStatusCode.Forbidden)
+            {
+                throw new UnauthorizedAccessException(result.Content.ToString());
+            }
+            return message;
+        }
+
 
         /// <summary>
         /// If user is admin, all messages should be returned, otherwise messages are returned per the userID (sub, extracted from claims).
@@ -162,7 +184,7 @@ namespace Repositories
                 else
                     throw new Exception(result.ToString());
             }
-            
+
         }
 
         private string AccessToken

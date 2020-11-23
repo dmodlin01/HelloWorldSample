@@ -52,9 +52,13 @@ namespace Dmitriy.IDP
             {
                 new Client //list of clients that would have access
                 {
-                    //AccessTokenLifetime = 120,
-                    //AllowOfflineAccess = true, //needed to refresh access token
-                    //UpdateAccessTokenClaimsOnRefresh = true, 
+                    //IdentityTokenLifetime = 300, //(in seconds) identitytoken is provided to the application upon initial authorization with the IDP
+                    //AuthorizationCodeLifetime =300, //(in seconds) happens when authorization endpoint is called
+                    AccessTokenLifetime = 1800, //lifetime of an access token (default is 1 hour)
+                    AllowOfflineAccess = true, //needed to allow accessing the refresh token (refresh token is used to request new ID, access and refresh tokens). At this point the client is not connected to IDP (offline)
+                    RefreshTokenExpiration = TokenExpiration.Sliding, //expiration window will slide out (for as long as client is active)
+                    //SlidingRefreshTokenLifetime = 432000,//determines how far the expiration will slide, default is 15 days
+                    UpdateAccessTokenClaimsOnRefresh = true, //new claims are obtained upon refresh (to ensure they are up-to-date)
                     ClientName = "Hello World Web Client",
                     ClientId = "helloworldwebclient",
                     AllowedGrantTypes = GrantTypes.Code,

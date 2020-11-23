@@ -62,7 +62,7 @@ namespace HelloWorldWeb.HttpHandlers
             var expiresAtAsDateTimeOffset =
                 DateTimeOffset.Parse(expiresAt, CultureInfo.InvariantCulture);
 
-            if (expiresAtAsDateTimeOffset.AddSeconds(-60).ToUniversalTime() > DateTime.UtcNow)
+            if (expiresAtAsDateTimeOffset.AddSeconds(-60).ToUniversalTime() > DateTime.UtcNow) //check if the token won't to expire within the next 60 sec
             {
                 // no need to refresh, return the access token
                 return await _httpContextAccessor
@@ -72,10 +72,10 @@ namespace HelloWorldWeb.HttpHandlers
             var idpClient = _httpClientFactory.CreateClient("IDPClient");
 
             // get the discovery document
-            var discoveryReponse = await idpClient.GetDiscoveryDocumentAsync();
+            var discoveryReponse = await idpClient.GetDiscoveryDocumentAsync(); //need it to determine the IDP token
 
             // refresh the tokens
-            var refreshToken = await _httpContextAccessor
+            var refreshToken = await _httpContextAccessor  //Request refreshtoken from IDP
                        .HttpContext.GetTokenAsync(OpenIdConnectParameterNames.RefreshToken);
 
             var refreshResponse = await idpClient.RequestRefreshTokenAsync(
@@ -87,7 +87,7 @@ namespace HelloWorldWeb.HttpHandlers
                     RefreshToken = refreshToken
                 });
 
-            // store the tokens             
+            // store the updated tokens             
             var updatedTokens = new List<AuthenticationToken>();
             updatedTokens.Add(new AuthenticationToken
             {

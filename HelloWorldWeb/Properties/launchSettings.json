@@ -2,6 +2,10 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/HelloWorldWeb",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:55772",
       "sslPort": 44304
